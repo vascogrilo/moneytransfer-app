@@ -1,0 +1,14 @@
+logs
+target
+/.idea
+/.idea_modules
+/.classpath
+/.project
+/.settings
+/RUNNING_PID
+*.iml
+*.ipr
+*.iws
+out
+.DS_STORE
+sbt-dist
