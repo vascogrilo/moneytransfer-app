@@ -2,17 +2,15 @@ package models;
 
 import java.lang.IllegalStateException;
 
-public class MoneyAccount {
+public class Account {
 
   private String id;
   private float balance;
 
-  public MoneyAccount(float initialBalance) {
-    this.balance = initialBalance;
-  }
+  public Account() { }
 
-  public MoneyAccount() {
-    this(0);
+  public Account(float initialBalance) {
+    this.balance = initialBalance;
   }
 
   public String getId() {
