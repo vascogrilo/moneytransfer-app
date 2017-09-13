@@ -1,13 +1,11 @@
-package store;
-
-import models.MoneyAccount;
+package models;
 
 import java.util.*;
 
 public class MoneyAccountStore {
-  private Map<String, MoneyAccount> accounts = new HashMap<String, MoneyAccount>();
+  private Map<String, Account> accounts = new HashMap<String, Account>();
 
-  public MoneyAccount addAccount(MoneyAccount account) {
+  public Account addAccount(Account account) {
     UUID uuid = UUID.randomUUID();
     String id = uuid.toString();
     account.setId(id);
@@ -15,15 +13,15 @@ public class MoneyAccountStore {
     return account;
   }
 
-  public MoneyAccount getAccount(String id) {
+  public Account getAccount(String id) {
       return accounts.get(id);
   }
 
-  public Set<MoneyAccount> getAllAccounts() {
-      return new HashSet<MoneyAccount>(accounts.values());
+  public Set<Account> getAllAccounts() {
+      return new HashSet<Account>(accounts.values());
   }
 
-  public MoneyAccount updateAccount(MoneyAccount account){
+  public Account updateAccount(Account account){
       String id = account.getId();
       if (accounts.containsKey(id)){
           accounts.put(id, account);

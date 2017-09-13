@@ -7,13 +7,12 @@ public class MoneyAccount {
   private String id;
   private float balance;
 
-  public MoneyAccount(String id, float initialBalance) {
-    this.id = id;
+  public MoneyAccount(float initialBalance) {
     this.balance = initialBalance;
   }
 
-  public MoneyAccount(String id) {
-    this(id, 0);
+  public MoneyAccount() {
+    this(0);
   }
 
   public String getId() {
@@ -28,12 +27,16 @@ public class MoneyAccount {
     return balance;
   }
 
-  public float depositFunds(float amount) {
+  public void setBalance(float balance) {
+    this.balance = balance;
+  }
+
+  public float deposit(float amount) {
     this.balance += amount;
     return this.balance;
   }
 
-  public float withdrawFunds(float amount) {
+  public float withdraw(float amount) {
     if (this.balance - amount < 0)
       throw new IllegalStateException();
     this.balance -= amount;
