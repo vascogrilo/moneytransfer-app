@@ -40,8 +40,8 @@ public class AccountTest {
         assertEquals(10021f, account.getBalance(), 0.01);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void withdrawTest() {
+    @Test(expected = Account.InsufficientFundsException.class)
+    public void withdrawTest() throws Account.InsufficientFundsException {
         Account account = new Account(20f);
         assertEquals(20f, account.getBalance(), 0.01);
 

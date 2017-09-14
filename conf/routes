@@ -19,3 +19,10 @@ PUT     /accounts                           controllers.AccountController.update
 DELETE  /accounts/:id                       controllers.AccountController.delete(id)
 PUT     /accounts/:id/deposit/:amount       controllers.AccountController.deposit(id,amount:Float)
 PUT     /accounts/:id/withdraw/:amount      controllers.AccountController.withdraw(id,amount:Float)
+OPTIONS /accounts                           controllers.AccountController.options()
+
+GET     /transfers                          controllers.TransferController.listTransfers()
+GET     /transfers/:id                      controllers.TransferController.get(id)
+POST    /transfers                          controllers.TransferController.create()
+DELETE  /transfers/:id                      controllers.TransferController.delete(id)
+OPTIONS /transfers                          controllers.TransferController.options()

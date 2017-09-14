@@ -1,7 +1,5 @@
 package models;
 
-import java.lang.IllegalStateException;
-
 public class Account {
 
   private String id;
@@ -9,8 +7,8 @@ public class Account {
 
   public Account() { }
 
-  public Account(float initialBalance) {
-    this.balance = initialBalance;
+  public Account(float balance) {
+    this.balance = balance;
   }
 
   public String getId() {
@@ -29,15 +27,21 @@ public class Account {
     this.balance = balance;
   }
 
-  public float deposit(float amount) {
+  public synchronized float deposit(float amount) {
     this.balance += amount;
     return this.balance;
   }
 
-  public float withdraw(float amount) {
+  public synchronized float withdraw(float amount) throws InsufficientFundsException {
     if (this.balance - amount < 0)
-      throw new IllegalStateException();
+      throw new InsufficientFundsException(id);
     this.balance -= amount;
     return this.balance;
+  }
+
+  public class InsufficientFundsException extends Exception{
+    public InsufficientFundsException(String accountId) {
+      super("Account with id " + accountId + " has insufficient funds for withdrawal.");
+    }
   }
 }
