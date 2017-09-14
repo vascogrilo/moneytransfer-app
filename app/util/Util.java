@@ -6,16 +6,16 @@ import play.libs.Json;
 
 public class Util {
 
-    public static ObjectNode createResponse(Object response, boolean ok){
-
-        ObjectNode result = Json.newObject();
-        result.put("isSuccessful", ok);
-        if (response instanceof String){
-            result.put("body", (String) response);
-        }
-        else {
-            result.put("body", (JsonNode) response);
-        }
-        return result;
-    }
+//    public static ObjectNode createResponse(Object response, boolean ok){
+//
+//        ObjectNode result = Json.newObject();
+//        result.put("success", ok);
+//        if (response instanceof String){
+//            result.put("body", (String) response);
+//        }
+//        else {
+//            result.put("body", (JsonNode) response);
+//        }
+//        return result;
+//    }
 }

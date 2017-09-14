@@ -7,7 +7,6 @@ import models.Transfer;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import util.Util;
 import java.util.Set;
 
 public class TransferController extends Controller {
@@ -16,36 +15,36 @@ public class TransferController extends Controller {
         Set<Transfer> transfers = ApplicationStore.getInstance().listTransfers();
         ObjectMapper mapper = new ObjectMapper();
         JsonNode data = mapper.convertValue(transfers, JsonNode.class);
-        return ok(Util.createResponse(data, true));
+        return ok(data);
     }
 
     public Result get(String id){
         Transfer transfer = ApplicationStore.getInstance().getTransfer(id);
         if (transfer == null)
-            return notFound(Util.createResponse("Transfer with id " + id + " not found", false));
-        return ok(Util.createResponse(Json.toJson(transfer), true));
+            return notFound("Transfer with id " + id + " not found");
+        return ok(Json.toJson(transfer));
     }
 
     public Result create(){
         JsonNode json = request().body().asJson();
         if (json == null)
-            return badRequest(Util.createResponse("JSON data required", false));
+            return badRequest("JSON data required");
 
         Transfer transfer = Json.fromJson(json, Transfer.class);
         if (transfer == null)
-            return badRequest(Util.createResponse("Invalid JSON data", true));
+            return badRequest("Invalid JSON data");
 
         try {
             transfer = ApplicationStore.getInstance().createTransfer(transfer);
-            return ok(Util.createResponse(Json.toJson(transfer), true));
+            return ok(Json.toJson(transfer));
         } catch (Exception e){
-            return forbidden(Util.createResponse(e.getMessage(), false));
+            return forbidden(e.getMessage());
         }
     }
 
     public Result delete(String id){
         if (!ApplicationStore.getInstance().deleteTransfer(id))
-            return notFound(Util.createResponse("Transfer with id " + id + " not found", false));
+            return notFound("Transfer with id " + id + " not found");
         return noContent();
     }
 

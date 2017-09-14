@@ -3,11 +3,15 @@ package models;
 public class Account {
 
   private String id;
+  private String name;
+  private String ownerName;
   private float balance;
 
   public Account() { }
 
-  public Account(float balance) {
+  public Account(String name, String ownerName, float balance) {
+    this.name = name;
+    this.ownerName = ownerName;
     this.balance = balance;
   }
 
@@ -17,6 +21,22 @@ public class Account {
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getOwnerName() {
+    return ownerName;
+  }
+
+  public void setOwnerName(String ownerName) {
+    this.ownerName = ownerName;
   }
 
   public float getBalance() {

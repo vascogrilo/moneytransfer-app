@@ -10,7 +10,7 @@ public class ApplicationStoreTest {
     @Test
     public void createAccountTest() {
         ApplicationStore store = ApplicationStore.newInstance();
-        Account account = new Account(100.5f);
+        Account account = new Account("name", "me",100.5f);
         account = store.createAccount(account);
         String id = account.getId();
 
@@ -27,7 +27,7 @@ public class ApplicationStoreTest {
     @Test
     public void updateAccountTest() {
         ApplicationStore store = ApplicationStore.newInstance();
-        Account account = new Account(50f);
+        Account account = new Account("name", "me", 50f);
         account = store.createAccount(account);
         String id = account.getId();
 
@@ -45,9 +45,9 @@ public class ApplicationStoreTest {
     @Test
     public void deleteAccountTest() {
         ApplicationStore store = ApplicationStore.newInstance();
-        Account account = new Account(50f);
+        Account account = new Account("name","me",50f);
         account = store.createAccount(account);
-        Account account1 = new Account(5000f);
+        Account account1 = new Account("name","me",5000f);
         account1 = store.createAccount(account1);
 
         assertTrue(store.deleteAccount(account.getId()));
@@ -61,9 +61,9 @@ public class ApplicationStoreTest {
     @Test
     public void getAllAndClearAllAccountsTest() {
         ApplicationStore store = ApplicationStore.newInstance();
-        Account account = new Account(50f);
+        Account account = new Account("name","me",50f);
         store.createAccount(account);
-        Account account1 = new Account(5000f);
+        Account account1 = new Account("name","me",5000f);
         store.createAccount(account1);
 
         assertEquals(2, store.listAccounts().size());
@@ -74,7 +74,7 @@ public class ApplicationStoreTest {
     @Test
     public void depositAccountTest() {
         ApplicationStore store = ApplicationStore.newInstance();
-        Account account = new Account(50f);
+        Account account = new Account("name","me",50f);
         store.createAccount(account);
         String id = account.getId();
 
@@ -86,7 +86,7 @@ public class ApplicationStoreTest {
     @Test
     public void withdrawAccountTest() throws Account.InsufficientFundsException {
         ApplicationStore store = ApplicationStore.newInstance();
-        Account account = new Account(50f);
+        Account account = new Account("name","me",50f);
         store.createAccount(account);
         String id = account.getId();
 
@@ -98,7 +98,7 @@ public class ApplicationStoreTest {
     @Test(expected = Account.InsufficientFundsException.class)
     public void withdrawAccountInsufficientFundsTest() throws Account.InsufficientFundsException {
         ApplicationStore store = ApplicationStore.newInstance();
-        Account account = new Account(0f);
+        Account account = new Account("name","me",0f);
         store.createAccount(account);
         String id = account.getId();
 
@@ -112,9 +112,9 @@ public class ApplicationStoreTest {
     @Test
     public void createTransferTest() throws ApplicationStore.AccountNotFoundException, Account.InsufficientFundsException {
         ApplicationStore store = ApplicationStore.newInstance();
-        Account account1 = new Account(10f);
+        Account account1 = new Account("name","me",10f);
         account1 = store.createAccount(account1);
-        Account account2 = new Account(20f);
+        Account account2 = new Account("name","me",20f);
         account2 = store.createAccount(account2);
 
         Transfer transfer = new Transfer(account1.getId(), account2.getId(), 9f);
@@ -136,7 +136,7 @@ public class ApplicationStoreTest {
     @Test(expected = ApplicationStore.AccountNotFoundException.class)
     public void createTransferNoOriginAccountTest() throws ApplicationStore.AccountNotFoundException, Account.InsufficientFundsException {
         ApplicationStore store = ApplicationStore.newInstance();
-        Account account1 = new Account(10f);
+        Account account1 = new Account("name","me",10f);
         account1 = store.createAccount(account1);
 
         Transfer transfer = new Transfer("2", account1.getId(), 9f);
@@ -147,7 +147,7 @@ public class ApplicationStoreTest {
     @Test(expected = ApplicationStore.AccountNotFoundException.class)
     public void createTransferNoDestinationAccountTest() throws ApplicationStore.AccountNotFoundException, Account.InsufficientFundsException {
         ApplicationStore store = ApplicationStore.newInstance();
-        Account account1 = new Account(10f);
+        Account account1 = new Account("name","me",10f);
         account1 = store.createAccount(account1);
 
         Transfer transfer = new Transfer(account1.getId(), "2", 9f);
@@ -157,9 +157,9 @@ public class ApplicationStoreTest {
     @Test(expected = Account.InsufficientFundsException.class)
     public void createInsufficientFundsTransferTest() throws ApplicationStore.AccountNotFoundException, Account.InsufficientFundsException {
         ApplicationStore store = ApplicationStore.newInstance();
-        Account account1 = new Account(10f);
+        Account account1 = new Account("name","me",10f);
         account1 = store.createAccount(account1);
-        Account account2 = new Account(20f);
+        Account account2 = new Account("name","me",20f);
         account2 = store.createAccount(account2);
 
         Transfer transfer = new Transfer(account1.getId(), account2.getId(), 20f);
@@ -169,9 +169,9 @@ public class ApplicationStoreTest {
     @Test
     public void listAndClearAllTransfers() throws ApplicationStore.AccountNotFoundException, Account.InsufficientFundsException {
         ApplicationStore store = ApplicationStore.newInstance();
-        Account account1 = new Account(10f);
+        Account account1 = new Account("name","me",10f);
         account1 = store.createAccount(account1);
-        Account account2 = new Account(20f);
+        Account account2 = new Account("name","me",20f);
         account2 = store.createAccount(account2);
 
         Transfer transfer1 = new Transfer(account1.getId(), account2.getId(), 9f);
@@ -188,9 +188,9 @@ public class ApplicationStoreTest {
     @Test
     public void deleteExistingTransfer() throws ApplicationStore.AccountNotFoundException, Account.InsufficientFundsException {
         ApplicationStore store = ApplicationStore.newInstance();
-        Account account1 = new Account(10f);
+        Account account1 = new Account("name","me",10f);
         account1 = store.createAccount(account1);
-        Account account2 = new Account(20f);
+        Account account2 = new Account("name","me",20f);
         account2 = store.createAccount(account2);
 
         Transfer transfer1 = new Transfer(account1.getId(), account2.getId(), 9f);
@@ -203,9 +203,9 @@ public class ApplicationStoreTest {
     @Test
     public void deleteNonExistingTransfer() throws ApplicationStore.AccountNotFoundException, Account.InsufficientFundsException {
         ApplicationStore store = ApplicationStore.newInstance();
-        Account account1 = new Account(10f);
+        Account account1 = new Account("name","me",10f);
         account1 = store.createAccount(account1);
-        Account account2 = new Account(20f);
+        Account account2 = new Account("name","me",20f);
         account2 = store.createAccount(account2);
 
         Transfer transfer1 = new Transfer(account1.getId(), account2.getId(), 9f);

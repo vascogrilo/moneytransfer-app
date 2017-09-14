@@ -7,8 +7,6 @@ import models.ApplicationStore;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import util.Util;
-
 import java.util.Set;
 
 
@@ -19,67 +17,68 @@ public class AccountController extends Controller {
         ObjectMapper mapper = new ObjectMapper();
 
         JsonNode jsonData = mapper.convertValue(accounts, JsonNode.class);
-        return ok(Util.createResponse(jsonData, true));
+        return ok(jsonData);
     }
 
     public Result create() {
         JsonNode json = request().body().asJson();
         if (json == null)
-            return badRequest(Util.createResponse("JSON data required", false));
+            return badRequest("JSON data required");
 
         Account account = Json.fromJson(json, Account.class);
         if (account == null)
-            return badRequest(Util.createResponse("Invalid JSON data", false));
+            return badRequest("Invalid JSON data");
 
         account = ApplicationStore.getInstance().createAccount(account);
-        JsonNode jsonObject = Json.toJson(account);
-        return created(Util.createResponse(jsonObject, true));
+        return created(Json.toJson(account));
     }
 
     public Result get(String id) {
         Account account = ApplicationStore.getInstance().getAccount(id);
         if (account == null)
-            return notFound(Util.createResponse("Account with id " + id + " not found", false));
-        return ok(Util.createResponse(Json.toJson(account), true));
+            return notFound("Account with id " + id + " not found");
+        return ok(Json.toJson(account));
     }
 
     public Result update() {
         JsonNode json = request().body().asJson();
         if (json == null)
-            return badRequest(Util.createResponse("JSON data required", false));
+            return badRequest("JSON data required");
 
         Account account = Json.fromJson(json, Account.class);
         if (account == null || account.getId() == null)
-            return badRequest(Util.createResponse("Invalid JSON", false));
+            return badRequest("Invalid JSON");
 
         Account updated = ApplicationStore.getInstance().updateAccount(account);
         if (updated == null)
-            return notFound(Util.createResponse("Account with id " +  account.getId() + " not found", false));
+            return notFound("Account with id " +  account.getId() + " not found");
 
-        return ok(Util.createResponse(Json.toJson(updated), true));
+        return ok(Json.toJson(updated));
     }
 
     public Result delete(String id) {
         if (!ApplicationStore.getInstance().deleteAccount(id))
-            return notFound(Util.createResponse("Account with id " + id + " not found", false));
+            return notFound("Account with id " + id + " not found");
         return noContent();
     }
 
     public Result deposit(String id, float amount){
         if (!ApplicationStore.getInstance().deposit(id, amount))
-            return notFound(Util.createResponse("Account with id " + id + " not found", false));
-        return ok(Util.createResponse(Json.toJson(ApplicationStore.getInstance().getAccount(id)), true));
+            return notFound("Account with id " + id + " not found");
+        Account account = ApplicationStore.getInstance().getAccount(id);
+        return ok(Json.toJson(account));
     }
 
     public Result withdraw(String id, float amount){
         try {
             if (!ApplicationStore.getInstance().withdraw(id, amount))
-                return notFound(Util.createResponse("Account with id " + id + " not found", false));
+                return notFound("Account with id " + id + " not found");
         }
         catch (Account.InsufficientFundsException ex){
-            return badRequest(Util.createResponse("Account with id " + id + " has insufficient funds", false));
+            return badRequest("Account with id " + id + " has insufficient funds");
         }
-        return ok(Util.createResponse(Json.toJson(ApplicationStore.getInstance().getAccount(id)), true));
+        Account account = ApplicationStore.getInstance().getAccount(id);
+        return ok(Json.toJson(account));
     }
 
     public Result options() {

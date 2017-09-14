@@ -13,7 +13,7 @@ public class AccountTest {
 
     @Test
     public void idTest() {
-        Account account = new Account(100f);
+        Account account = new Account("name", "me",100f);
         assertEquals(100f, account.getBalance(), 0.01);
 
         account.setId("42");
@@ -22,7 +22,7 @@ public class AccountTest {
 
     @Test
     public void balanceTest() {
-        Account account = new Account(20f);
+        Account account = new Account("name", "me",20f);
         assertEquals(20f, account.getBalance(), 0.01);
 
         account.setBalance(1f);
@@ -30,8 +30,30 @@ public class AccountTest {
     }
 
     @Test
+    public void nameTest() {
+        Account account = new Account("name", "me", 120f);
+        assertEquals("name", account.getName());
+        assertEquals("me", account.getOwnerName());
+        assertEquals(120f, account.getBalance(), 0.01);
+
+        account.setName("some other name");
+        assertEquals("some other name", account.getName());
+    }
+
+    @Test
+    public void ownerNameTest() {
+        Account account = new Account("name", "me", 120f);
+        assertEquals("name", account.getName());
+        assertEquals("me", account.getOwnerName());
+        assertEquals(120f, account.getBalance(), 0.01);
+
+        account.setOwnerName("you");
+        assertEquals("you", account.getOwnerName());
+    }
+
+    @Test
     public void depositTest() {
-        Account account = new Account(20f);
+        Account account = new Account("name", "me",20f);
         assertEquals(20f, account.getBalance(), 0.01);
 
         account.deposit(1f);
@@ -42,7 +64,7 @@ public class AccountTest {
 
     @Test(expected = Account.InsufficientFundsException.class)
     public void withdrawTest() throws Account.InsufficientFundsException {
-        Account account = new Account(20f);
+        Account account = new Account("name", "me",20f);
         assertEquals(20f, account.getBalance(), 0.01);
 
         account.withdraw(1f);
