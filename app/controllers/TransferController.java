@@ -7,14 +7,28 @@ import models.Transfer;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import java.util.Set;
+import java.util.stream.Stream;
 
 public class TransferController extends Controller {
 
-    public Result listTransfers() {
-        Set<Transfer> transfers = ApplicationStore.getInstance().listTransfers();
+    public Result listTransfers(String id, String originAccountId, String destinationAccountId, Float amount, Float aboveAmount, Float belowAmount) {
+        Stream<Transfer> transfers = ApplicationStore.getInstance().listTransfers().stream();
+        if (id != null)
+            transfers = transfers.filter((transfer -> transfer.getId().equals(id)));
+        if (originAccountId != null)
+            transfers = transfers.filter((transfer -> transfer.getOriginAccountId().equals(originAccountId)));
+        if (destinationAccountId != null)
+            transfers = transfers.filter((transfer -> transfer.getDestinationAccountId().equals(destinationAccountId)));
+        boolean exactAmount = !amount.isNaN();
+        if (exactAmount)
+            transfers = transfers.filter((transfer -> transfer.getAmount() == amount));
+        if (!exactAmount && !aboveAmount.isNaN())
+            transfers = transfers.filter((transfer -> transfer.getAmount() > aboveAmount));
+        if (!exactAmount && !belowAmount.isNaN())
+            transfers = transfers.filter((transfer -> transfer.getAmount() < belowAmount));
+
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode data = mapper.convertValue(transfers, JsonNode.class);
+        JsonNode data = mapper.convertValue(transfers.toArray(), JsonNode.class);
         return ok(data);
     }
 
@@ -31,8 +45,12 @@ public class TransferController extends Controller {
             return badRequest("JSON data required");
 
         Transfer transfer = Json.fromJson(json, Transfer.class);
-        if (transfer == null)
+        if (transfer == null || transfer.getOriginAccountId() == null || transfer.getDestinationAccountId() == null)
             return badRequest("Invalid JSON data");
+
+        Float amount = transfer.getAmount();
+        if (amount <= 0 || amount.isNaN() || amount.isInfinite())
+            return badRequest("Transfer amount must be above 0");
 
         try {
             transfer = ApplicationStore.getInstance().createTransfer(transfer);

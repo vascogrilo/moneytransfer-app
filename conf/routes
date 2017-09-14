@@ -8,16 +8,16 @@
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
-GET     /accounts                           controllers.AccountController.listAccounts()
+GET     /accounts                           controllers.AccountController.listAccounts(name ?= null, ownerName ?= null, balance: Float ?= Float.NaN, aboveBalance: Float ?= Float.NaN, belowBalance: Float ?= Float.NaN)
 GET     /accounts/:id                       controllers.AccountController.get(id)
 POST    /accounts                           controllers.AccountController.create()
-PUT     /accounts                           controllers.AccountController.update()
-DELETE  /accounts/:id                       controllers.AccountController.delete(id)
+PUT     /accounts/:id                       controllers.AccountController.update(id)
 PUT     /accounts/:id/deposit/:amount       controllers.AccountController.deposit(id,amount:Float)
 PUT     /accounts/:id/withdraw/:amount      controllers.AccountController.withdraw(id,amount:Float)
+DELETE  /accounts/:id                       controllers.AccountController.delete(id)
 OPTIONS /accounts                           controllers.AccountController.options()
 
-GET     /transfers                          controllers.TransferController.listTransfers()
+GET     /transfers                          controllers.TransferController.listTransfers(id ?= null, originAccountId ?= null, destinationAccountId ?= null, amount: Float ?= Float.NaN, aboveAmount: Float ?= Float.NaN, belowAmount: Float ?= Float.NaN)
 GET     /transfers/:id                      controllers.TransferController.get(id)
 POST    /transfers                          controllers.TransferController.create()
 DELETE  /transfers/:id                      controllers.TransferController.delete(id)

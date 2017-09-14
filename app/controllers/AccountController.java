@@ -7,16 +7,27 @@ import models.ApplicationStore;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import java.util.Set;
+import java.util.stream.Stream;
 
 
 public class AccountController extends Controller {
 
-    public Result listAccounts(){
-        Set<Account> accounts = ApplicationStore.getInstance().listAccounts();
-        ObjectMapper mapper = new ObjectMapper();
+    public Result listAccounts(String name, String ownerName, Float balance, Float aboveBalance, Float belowBalance){
+        Stream<Account> accounts = ApplicationStore.getInstance().listAccounts().stream();
+        if (name != null)
+            accounts = accounts.filter((account) -> account.getName().equals(name));
+        if (ownerName != null)
+            accounts = accounts.filter((account) -> account.getOwnerName().equals(ownerName));
+        boolean exactBalance = !balance.isNaN();
+        if (exactBalance)
+            accounts = accounts.filter((account -> account.getBalance() == balance));
+        if (!exactBalance && !aboveBalance.isNaN())
+            accounts = accounts.filter((account -> account.getBalance() > aboveBalance));
+        if (!exactBalance && !belowBalance.isNaN())
+            accounts = accounts.filter((account -> account.getBalance() < belowBalance));
 
-        JsonNode jsonData = mapper.convertValue(accounts, JsonNode.class);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode jsonData = mapper.convertValue(accounts.toArray(), JsonNode.class);
         return ok(jsonData);
     }
 
@@ -26,11 +37,11 @@ public class AccountController extends Controller {
             return badRequest("JSON data required");
 
         Account account = Json.fromJson(json, Account.class);
-        if (account == null)
+        if (account == null || account.getName() == null || account.getOwnerName() == null)
             return badRequest("Invalid JSON data");
 
         account = ApplicationStore.getInstance().createAccount(account);
-        return created(Json.toJson(account));
+        return created(Json.toJson(account)).withHeader("Location", "/accounts/" + account.getId());
     }
 
     public Result get(String id) {
@@ -40,14 +51,19 @@ public class AccountController extends Controller {
         return ok(Json.toJson(account));
     }
 
-    public Result update() {
+    public Result update(String id) {
+        if (id == null)
+            return badRequest("Resource id is necessary");
+
         JsonNode json = request().body().asJson();
         if (json == null)
             return badRequest("JSON data required");
 
         Account account = Json.fromJson(json, Account.class);
-        if (account == null || account.getId() == null)
-            return badRequest("Invalid JSON");
+        if (account == null || account.getId() == null || account.getName() == null || account.getOwnerName() == null)
+            return badRequest("Invalid JSON data");
+        if (!id.equals(account.getId()))
+            return forbidden("Resource id does not match account id");
 
         Account updated = ApplicationStore.getInstance().updateAccount(account);
         if (updated == null)
