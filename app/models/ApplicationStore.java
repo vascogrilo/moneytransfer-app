@@ -5,6 +5,7 @@ import services.TransferStorage;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class ApplicationStore implements AccountStorage, TransferStorage {
 
@@ -43,6 +44,45 @@ public class ApplicationStore implements AccountStorage, TransferStorage {
     @Override
     public synchronized Set<Account> listAccounts() {
       return new HashSet<>(accounts.values());
+    }
+
+    @Override
+    public Account[] listAccounts(String name, String ownerName, Float balance, Float aboveBalance, Float belowBalance, String sort) {
+        Stream<Account> stream = accounts.values().stream();
+
+        //filtering
+        if (name != null)
+            stream = stream.filter((account) -> account.getName().equals(name));
+        if (ownerName != null)
+            stream = stream.filter((account) -> account.getOwnerName().equals(ownerName));
+        boolean exactBalance = !balance.isNaN();
+        if (exactBalance)
+            stream = stream.filter((account -> account.getBalance() == balance));
+        if (!exactBalance && !aboveBalance.isNaN())
+            stream = stream.filter((account -> account.getBalance() > aboveBalance));
+        if (!exactBalance && !belowBalance.isNaN())
+            stream = stream.filter((account -> account.getBalance() < belowBalance));
+
+        // ordering
+        if (sort != null){
+            final boolean desc = sort.startsWith("-");
+            if (desc) sort = sort.substring(1);
+            switch (sort){
+                case "id":
+                    stream = stream.sorted((a1, a2) -> desc ? a2.getId().compareTo(a1.getId()) : a1.getId().compareTo(a2.getId()));
+                    break;
+                case "name":
+                    stream = stream.sorted((a1, a2) -> desc ? a2.getName().compareTo(a1.getName()) : a1.getName().compareTo(a2.getName()));
+                    break;
+                case "ownerName":
+                    stream = stream.sorted((a1, a2) -> desc ? a2.getOwnerName().compareTo(a1.getOwnerName()) : a1.getOwnerName().compareTo(a2.getOwnerName()));
+                    break;
+                case "balance":
+                    stream = stream.sorted((a1, a2) -> desc ? Float.compare(a2.getBalance(), a1.getBalance()) : Float.compare(a1.getBalance(), a2.getBalance()));
+                    break;
+            }
+        }
+        return (Account[]) stream.toArray();
     }
 
     @Override
@@ -90,6 +130,50 @@ public class ApplicationStore implements AccountStorage, TransferStorage {
     @Override
     public synchronized Set<Transfer> listTransfers() {
         return new HashSet<>(transfers.values());
+    }
+
+    @Override
+    public Transfer[] listTransfers(String id, String originAccountId, String destinationAccountId, Float amount, Float aboveAmount, Float belowAmount, String sort) {
+        Stream<Transfer> stream = transfers.values().stream();
+
+        //filtering
+        if (id != null)
+            stream = stream.filter((transfer -> transfer.getId().equals(id)));
+        if (originAccountId != null)
+            stream = stream.filter((transfer -> transfer.getOriginAccountId().equals(originAccountId)));
+        if (destinationAccountId != null)
+            stream = stream.filter((transfer -> transfer.getDestinationAccountId().equals(destinationAccountId)));
+        boolean exactAmount = !amount.isNaN();
+        if (exactAmount)
+            stream = stream.filter((transfer -> transfer.getAmount() == amount));
+        if (!exactAmount && !aboveAmount.isNaN())
+            stream = stream.filter((transfer -> transfer.getAmount() > aboveAmount));
+        if (!exactAmount && !belowAmount.isNaN())
+            stream = stream.filter((transfer -> transfer.getAmount() < belowAmount));
+
+        // ordering
+        if (sort != null){
+            final boolean desc = sort.startsWith("-");
+            if (desc) sort = sort.substring(1);
+            switch (sort){
+                case "id":
+                    stream = stream.sorted((t1, t2) -> desc ? t2.getId().compareTo(t1.getId()) : t1.getId().compareTo(t2.getId()));
+                    break;
+                case "originAccountId":
+                    stream = stream.sorted((t1, t2) -> desc ? t2.getOriginAccountId().compareTo(t1.getOriginAccountId()) : t1.getOriginAccountId().compareTo(t2.getOriginAccountId()));
+                    break;
+                case "destinationAccountId":
+                    stream = stream.sorted((t1, t2) -> desc ? t2.getDestinationAccountId().compareTo(t1.getDestinationAccountId()) : t1.getDestinationAccountId().compareTo(t2.getDestinationAccountId()));
+                    break;
+                case "amount":
+                    stream = stream.sorted((t1, t2) -> desc ? Float.compare(t2.getAmount(), t1.getAmount()) : Float.compare(t1.getAmount(), t2.getAmount()));
+                    break;
+                case "timestamp":
+                    stream = stream.sorted((t1, t2) -> desc ? Instant.parse(t2.getTimestamp()).compareTo(Instant.parse(t1.getTimestamp())) : Instant.parse(t1.getTimestamp()).compareTo(Instant.parse(t2.getTimestamp())));
+                    break;
+            }
+        }
+        return (Transfer[]) stream.toArray();
     }
 
     @Override

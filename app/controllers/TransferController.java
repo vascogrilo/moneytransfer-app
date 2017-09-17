@@ -7,28 +7,13 @@ import models.Transfer;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import java.util.stream.Stream;
 
 public class TransferController extends Controller {
 
-    public Result listTransfers(String id, String originAccountId, String destinationAccountId, Float amount, Float aboveAmount, Float belowAmount) {
-        Stream<Transfer> transfers = ApplicationStore.getInstance().listTransfers().stream();
-        if (id != null)
-            transfers = transfers.filter((transfer -> transfer.getId().equals(id)));
-        if (originAccountId != null)
-            transfers = transfers.filter((transfer -> transfer.getOriginAccountId().equals(originAccountId)));
-        if (destinationAccountId != null)
-            transfers = transfers.filter((transfer -> transfer.getDestinationAccountId().equals(destinationAccountId)));
-        boolean exactAmount = !amount.isNaN();
-        if (exactAmount)
-            transfers = transfers.filter((transfer -> transfer.getAmount() == amount));
-        if (!exactAmount && !aboveAmount.isNaN())
-            transfers = transfers.filter((transfer -> transfer.getAmount() > aboveAmount));
-        if (!exactAmount && !belowAmount.isNaN())
-            transfers = transfers.filter((transfer -> transfer.getAmount() < belowAmount));
-
+    public Result listTransfers(String id, String originAccountId, String destinationAccountId, Float amount, Float aboveAmount, Float belowAmount, String sort) {
+        Transfer[] transfers = ApplicationStore.getInstance().listTransfers(id, originAccountId, destinationAccountId, amount, aboveAmount, belowAmount, sort);
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode data = mapper.convertValue(transfers.toArray(), JsonNode.class);
+        JsonNode data = mapper.convertValue(transfers, JsonNode.class);
         return ok(data);
     }
 

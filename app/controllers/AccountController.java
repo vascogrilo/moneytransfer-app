@@ -7,27 +7,13 @@ import models.ApplicationStore;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import java.util.stream.Stream;
-
 
 public class AccountController extends Controller {
 
-    public Result listAccounts(String name, String ownerName, Float balance, Float aboveBalance, Float belowBalance){
-        Stream<Account> accounts = ApplicationStore.getInstance().listAccounts().stream();
-        if (name != null)
-            accounts = accounts.filter((account) -> account.getName().equals(name));
-        if (ownerName != null)
-            accounts = accounts.filter((account) -> account.getOwnerName().equals(ownerName));
-        boolean exactBalance = !balance.isNaN();
-        if (exactBalance)
-            accounts = accounts.filter((account -> account.getBalance() == balance));
-        if (!exactBalance && !aboveBalance.isNaN())
-            accounts = accounts.filter((account -> account.getBalance() > aboveBalance));
-        if (!exactBalance && !belowBalance.isNaN())
-            accounts = accounts.filter((account -> account.getBalance() < belowBalance));
-
+    public Result listAccounts(String name, String ownerName, Float balance, Float aboveBalance, Float belowBalance, String sort){
+        Account[] accounts = ApplicationStore.getInstance().listAccounts(name, ownerName, balance, aboveBalance, belowBalance, sort);
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode jsonData = mapper.convertValue(accounts.toArray(), JsonNode.class);
+        JsonNode jsonData = mapper.convertValue(accounts, JsonNode.class);
         return ok(jsonData);
     }
 
