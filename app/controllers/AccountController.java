@@ -89,7 +89,7 @@ public class AccountController extends Controller {
             return badRequest("JSON data required");
 
         Account account = Json.fromJson(json, Account.class);
-        if (account == null || account.getId() == null || account.getName() == null || account.getOwnerName() == null)
+        if (account == null || StringUtils.isEmpty(account.getId()) || StringUtils.isEmpty(account.getName()) || StringUtils.isEmpty(account.getOwnerName()))
             return badRequest("Invalid JSON data");
         if (!id.equals(account.getId()))
             return forbidden("Resource id does not match account id");

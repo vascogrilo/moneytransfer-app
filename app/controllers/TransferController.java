@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import models.ApplicationStore;
 import models.Transfer;
+import org.apache.commons.lang3.StringUtils;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -64,12 +65,15 @@ public class TransferController extends Controller {
             return badRequest("JSON data required");
 
         Transfer transfer = Json.fromJson(json, Transfer.class);
-        if (transfer == null || transfer.getOriginAccountId() == null || transfer.getDestinationAccountId() == null)
+        if (transfer == null || StringUtils.isEmpty(transfer.getOriginAccountId()) || StringUtils.isEmpty(transfer.getDestinationAccountId()))
             return badRequest("Invalid JSON data");
+
+        if (transfer.getOriginAccountId().equals(transfer.getDestinationAccountId()))
+            return forbidden("Origin and destination account ids must not be the same.");
 
         Float amount = transfer.getAmount();
         if (amount <= 0 || amount.isNaN() || amount.isInfinite())
-            return badRequest("Transfer amount must be above 0");
+            return forbidden("Transfer amount must be above 0");
 
         try {
             transfer = ApplicationStore.getInstance().createTransfer(transfer);
