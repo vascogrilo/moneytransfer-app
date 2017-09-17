@@ -50,7 +50,7 @@ public class Transfer {
      * @throws IllegalArgumentException if string is null or empty.
      */
     public void setId(String id){
-        validateString(id);
+        //validateString(id);
         this.id = id;
     }
 
@@ -68,7 +68,7 @@ public class Transfer {
      * @throws IllegalArgumentException if string is null or empty.
      */
     public void setOriginAccountId(String id){
-        validateString(id);
+        //validateString(id);
         this.originAccountId = id;
     }
 
@@ -86,7 +86,7 @@ public class Transfer {
      * @throws IllegalArgumentException if string is null or empty.
      */
     public void setDestinationAccountId(String id) {
-        validateString(id);
+        //validateString(id);
         this.destinationAccountId = id;
     }
 
@@ -104,7 +104,7 @@ public class Transfer {
      * @throws IllegalArgumentException if amount is less or equal than zero, NaN or infinite.
      */
     public void setAmount(Float amount) {
-        validateAmount(amount);
+        //validateAmount(amount);
         this.amount = amount;
     }
 

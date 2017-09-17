@@ -3,6 +3,7 @@ package services;
 import models.Account;
 
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Basic API for storing and maintaining a list of {@link Account}s.
@@ -23,7 +24,7 @@ public interface AccountStorage {
      * @param sort Optional field name to sort for. Prepend with '-' for descending order.
      * @return An array of accounts possibly sorted by 'sort' param and that match provided field values.
      */
-    Account[] listAccounts(String name, String ownerName, Float balance, Float aboveBalance, Float belowBalance, String sort);
+    Stream<Account> listAccounts(String name, String ownerName, Float balance, Float aboveBalance, Float belowBalance, String sort);
     /**
      * Retrieves an {@link Account} by its id.
      * @param id The account id.

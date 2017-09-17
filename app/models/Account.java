@@ -48,10 +48,8 @@ public class Account {
   /**
    * Sets the account's id.
    * @param id A string for the account's id.
-   * @throws IllegalArgumentException if string is null or empty.
    */
   public void setId(String id) {
-    validateString(id);
     this.id = id;
   }
 
@@ -69,7 +67,7 @@ public class Account {
    * @throws IllegalArgumentException if string is null or empty.
    */
   public void setName(String name) {
-    validateString(name);
+    //validateString(name);
     this.name = name;
   }
 
@@ -87,7 +85,7 @@ public class Account {
    * @throws IllegalArgumentException if string is null or empty.
    */
   public void setOwnerName(String ownerName) {
-    validateString(ownerName);
+    //validateString(ownerName);
     this.ownerName = ownerName;
   }
 

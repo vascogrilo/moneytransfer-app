@@ -8,6 +8,8 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 
+import java.util.stream.Stream;
+
 /**
  * Controller for interacting with the Transfer resource.
  * Provides the following list of operations:
@@ -32,9 +34,9 @@ public class TransferController extends Controller {
      * @return OK with a list of transfers according to input terms.
      */
     public Result listTransfers(String originAccountId, String destinationAccountId, Float amount, Float aboveAmount, Float belowAmount, String sort) {
-        Transfer[] transfers = ApplicationStore.getInstance().listTransfers(originAccountId, destinationAccountId, amount, aboveAmount, belowAmount, sort);
+        Stream<Transfer> transfers = ApplicationStore.getInstance().listTransfers(originAccountId, destinationAccountId, amount, aboveAmount, belowAmount, sort);
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode data = mapper.convertValue(transfers, JsonNode.class);
+        JsonNode data = mapper.convertValue(transfers.toArray(), JsonNode.class);
         return ok(data);
     }
 
@@ -71,7 +73,7 @@ public class TransferController extends Controller {
 
         try {
             transfer = ApplicationStore.getInstance().createTransfer(transfer);
-            return ok(Json.toJson(transfer)).withHeader("Location", "/transfers/" + transfer.getId());
+            return created(Json.toJson(transfer)).withHeader("Location", "/transfers/" + transfer.getId());
         } catch (Exception e){
             return forbidden(e.getMessage());
         }

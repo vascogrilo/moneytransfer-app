@@ -4,6 +4,7 @@ import models.Account;
 import models.ApplicationStore;
 import models.Transfer;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Basic API for storing and maintaining a list of {@link Transfer}s.
@@ -24,7 +25,7 @@ public interface TransferStorage {
      * @param sort Optional field name to sort for. Prepend with '-' for descending order.
      * @return An array of transfers possibly sorted by 'sort' param and that match provided field values.
      */
-    Transfer[] listTransfers(String originAccountId, String destinationAccountId, Float amount, Float aboveAmount, Float belowAmount, String sort);
+    Stream<Transfer> listTransfers(String originAccountId, String destinationAccountId, Float amount, Float aboveAmount, Float belowAmount, String sort);
     /**
      * Retrieves a certain {@link Transfer}.
      * @param id The transfer's id.

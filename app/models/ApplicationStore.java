@@ -87,7 +87,7 @@ public class ApplicationStore implements AccountStorage, TransferStorage {
      * @return An array of accounts possibly sorted by 'sort' param and that match provided field values.
      */
     @Override
-    public Account[] listAccounts(String name, String ownerName, Float balance, Float aboveBalance, Float belowBalance, String sort) {
+    public Stream<Account> listAccounts(String name, String ownerName, Float balance, Float aboveBalance, Float belowBalance, String sort) {
         Stream<Account> stream = accounts.values().stream();
 
         //filtering
@@ -122,7 +122,7 @@ public class ApplicationStore implements AccountStorage, TransferStorage {
                     break;
             }
         }
-        return (Account[]) stream.toArray();
+        return stream;
     }
 
     /**
@@ -213,7 +213,7 @@ public class ApplicationStore implements AccountStorage, TransferStorage {
      * @return An array of transfers possibly sorted by 'sort' param and that match provided field values.
      */
     @Override
-    public Transfer[] listTransfers(String originAccountId, String destinationAccountId, Float amount, Float aboveAmount, Float belowAmount, String sort) {
+    public Stream<Transfer> listTransfers(String originAccountId, String destinationAccountId, Float amount, Float aboveAmount, Float belowAmount, String sort) {
         Stream<Transfer> stream = transfers.values().stream();
 
         //filtering
@@ -251,7 +251,7 @@ public class ApplicationStore implements AccountStorage, TransferStorage {
                     break;
             }
         }
-        return (Transfer[]) stream.toArray();
+        return stream;
     }
 
     /**

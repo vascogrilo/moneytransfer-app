@@ -4,9 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import models.Account;
 import models.ApplicationStore;
+import org.apache.commons.lang3.StringUtils;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+
+import java.util.stream.Stream;
 
 /**
  * Controller for interacting with the Account resource.
@@ -35,9 +38,9 @@ public class AccountController extends Controller {
      * @return OK with a list of accounts according to input terms.
      */
     public Result listAccounts(String name, String ownerName, Float balance, Float aboveBalance, Float belowBalance, String sort){
-        Account[] accounts = ApplicationStore.getInstance().listAccounts(name, ownerName, balance, aboveBalance, belowBalance, sort);
+        Stream<Account> accounts = ApplicationStore.getInstance().listAccounts(name, ownerName, balance, aboveBalance, belowBalance, sort);
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode jsonData = mapper.convertValue(accounts, JsonNode.class);
+        JsonNode jsonData = mapper.convertValue(accounts.toArray(), JsonNode.class);
         return ok(jsonData);
     }
 
@@ -53,7 +56,7 @@ public class AccountController extends Controller {
             return badRequest("JSON data required");
 
         Account account = Json.fromJson(json, Account.class);
-        if (account == null || account.getName() == null || account.getOwnerName() == null)
+        if (account == null || StringUtils.isEmpty(account.getName())|| StringUtils.isEmpty(account.getOwnerName()))
             return badRequest("Invalid JSON data");
 
         account = ApplicationStore.getInstance().createAccount(account);
