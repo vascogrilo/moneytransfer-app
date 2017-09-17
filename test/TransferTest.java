@@ -30,6 +30,20 @@ public class TransferTest {
     }
 
     @Test
+    public void originAccountIdTest() {
+        Transfer transfer = new Transfer();
+        transfer.setOriginAccountId("account");
+        assertEquals("account", transfer.getOriginAccountId());
+    }
+
+    @Test
+    public void destinationAccountIdTest() {
+        Transfer transfer = new Transfer();
+        transfer.setDestinationAccountId("account");
+        assertEquals("account", transfer.getDestinationAccountId());
+    }
+
+    @Test
     public void constructorTest() {
         Transfer transfer = new Transfer("1","2",3f);
         assertEquals("1", transfer.getOriginAccountId());
