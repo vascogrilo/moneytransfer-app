@@ -78,8 +78,8 @@ public class ApplicationStoreTest {
         store.createAccount(account);
         String id = account.getId();
 
-        assertTrue(store.deposit(id, 10f));
-        account = store.getAccount(id);
+        account = store.deposit(id, 10f);
+        assertNotNull(account);
         assertEquals(60f, account.getBalance(), 0.01);
     }
 
@@ -90,8 +90,8 @@ public class ApplicationStoreTest {
         store.createAccount(account);
         String id = account.getId();
 
-        assertTrue(store.withdraw(id, 10f));
-        account = store.getAccount(id);
+        account = store.withdraw(id, 10f);
+        assertNotNull(account);
         assertEquals(40f, account.getBalance(), 0.01);
     }
 
@@ -102,8 +102,8 @@ public class ApplicationStoreTest {
         store.createAccount(account);
         String id = account.getId();
 
-        assertTrue(store.deposit(id, 10f));
-        account = store.getAccount(id);
+        account = store.deposit(id, 10f);
+        assertNotNull(account);
         assertEquals(10f, account.getBalance(), 0.01);
 
         store.withdraw(id, 11f);

@@ -56,10 +56,18 @@ public class AccountTest {
         Account account = new Account("name", "me",20f);
         assertEquals(20f, account.getBalance(), 0.01);
 
-        account.deposit(1f);
+        account = account.deposit(1f);
         assertEquals(21f, account.getBalance(), 0.01);
         account.deposit(10000f);
         assertEquals(10021f, account.getBalance(), 0.01);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void depositNegativeTest() {
+        Account account = new Account("name", "me",20f);
+        assertEquals(20f, account.getBalance(), 0.01);
+
+        account.deposit(-1f);
     }
 
     @Test(expected = Account.InsufficientFundsException.class)
@@ -67,8 +75,16 @@ public class AccountTest {
         Account account = new Account("name", "me",20f);
         assertEquals(20f, account.getBalance(), 0.01);
 
-        account.withdraw(1f);
+        account = account.withdraw(1f);
         assertEquals(19f, account.getBalance(), 0.01);
         account.withdraw(10000f);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void withdrawNegativeTest() throws Account.InsufficientFundsException {
+        Account account = new Account("name", "me",20f);
+        assertEquals(20f, account.getBalance(), 0.01);
+
+        account.withdraw(-20f);
     }
 }
