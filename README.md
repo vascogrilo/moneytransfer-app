@@ -29,7 +29,6 @@ It would make more sense to be a type like **Date** or **Instant** but for the s
 
 ## 2. Storage
 As the test requested, everything is stored in-memory. No need for external storage.
-A singleton class _ApplicationStore_ is responsible for maintaining and provide interaction with both resources: account and transfers.
 
 ### 2.1. Apis
 I've defined two interfaces for a clear separation of what can be performed when managing the resources.
@@ -66,6 +65,14 @@ The following operations should be implemented for a transfer storage:
 * Transfer _createTransfer(Transfer transfer)_
 * boolean _deleteTransfer(String id)_
 * void _clearTransfers()_
+
+### 2.2. ApplicationStore
+This class implements both _AccountStorage_ and _TransferStorage_ and is responsible for maintaining the list of both accounts and transfers.
+
+Creating an account needs to perform some validation like the account's name and owner name can't be either null or an empty string. The initial balance must not be below zero, NaN or Infinity. An internal id must be generated and assigned to the account.
+Updating an account needs to perform some validation like the _modified_ account's name and owner name can't be either null or empty string. The new balance must not be below zero, NaN or Infinity.
+
+Creating a transfer involves several checks. First of all the origin account id and destination account id must identify _existing_ accounts and they should not be the same. The amount should be above 0 and not NaN or Infinity. If these requirements are validated the transfer is considered OK and an internal id should be generated and assigned to the transfer, along with a timestamp of the operation. Now the _amount_ must be withdrawn from the origin account and deposited into the destination account, if the origin account has sufficient funds.
 
 ## 3. HTTP REST API
 As the test requested there is no authentication on the http layer. Also, for the sake of this test, I chose to leave out any SSL.
