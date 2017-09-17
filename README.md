@@ -4,11 +4,9 @@ This test consisted on building a RESTful API for money transfers between accoun
 I chose to implement this in Java and using the Play framework (because I've used it before and sped up development process).
 
 ## 1. Data Models
-
 One of the main requirements for this was to keep it simple and to the point, no need for overcomplicating stuff with uneeded functionality.
 
 ### 1.1. Account
-
 An account represents something like a _digital wallet_.
 A simple account model was designed that contains the following information:
 * Id: **String**
@@ -17,7 +15,6 @@ A simple account model was designed that contains the following information:
 * Balance: **Float**
 
 ### 1.2. Transfer
-
 Transfer will be a resource that represents a transfer operation of a certain amount between two accounts.
 A simple transfer model was designed that contains the following information:
 * Id: **String**
@@ -31,12 +28,10 @@ It would make more sense to be a type like **Date** or **Instant** but for the s
 (Transfers cannot be updated and the server defines the timestamp so having it as a string doesn't prove that much of an hassle)
 
 ## 2. Storage
-
 As the test requested, everything is stored in-memory. No need for external storage.
 A singleton class _ApplicationStore_ is responsible for maintaining and provide interaction with both resources: account and transfers.
 
 ### 2.1. Apis
-
 I've defined two interfaces for a clear separation of what can be performed when managing the resources.
 
 #### 2.1.1. Account storage
@@ -73,11 +68,9 @@ The following operations should be implemented for a transfer storage:
 * void _clearTransfers()_
 
 ## 3. HTTP REST API
-
 As the test requested there is no authentication on the http layer. Also, for the sake of this test, I chose to leave out any SSL.
 
 ### 3.1. /accounts
-
 The following operations are available to be performed on this resource:
 * **GET /accounts**
   * Lists all accounts. It is possible to supply query params for filtering and sorting (see **Account storage** api).
@@ -108,3 +101,8 @@ The following operations are available to be performed on this resource:
   * Deletes a transfer, identified by _id_
 * **OPTIONS /transfers**
   * Lists all possible operations on this resource
+
+## 4. Considerations
+The account model is pretty basic in which it only defines a balance that cannot go below zero. I thought about adding a second balance which woulld be **allowed balance** and with that I could allow for transfers to succeed even if the origin account did not have enough **available balance** but still **allowed balance**.
+I've also considered representing different types of currency. An account would have a specific currency. There would be a different resource (maybe _/exchanges_) which would define exchange rates between different types of currency. Then, a transfer between two accounts with different currencies would check these rates and convert the origin amount to the destination currency.
+After some consideration and remembering to keep it simple and to the point I've decided to not implement these two functionalities.
