@@ -113,3 +113,15 @@ The following operations are available to be performed on this resource:
 The account model is pretty basic in which it only defines a balance that cannot go below zero. I thought about adding a second balance which woulld be **allowed balance** and with that I could allow for transfers to succeed even if the origin account did not have enough **available balance** but still **allowed balance**.
 I've also considered representing different types of currency. An account would have a specific currency. There would be a different resource (maybe _/exchanges_) which would define exchange rates between different types of currency. Then, a transfer between two accounts with different currencies would check these rates and convert the origin amount to the destination currency.
 After some consideration and remembering to keep it simple and to the point I've decided to not implement these two functionalities.
+
+It was requested to prove that the application works through tests. I have added unit testing for Account, Transfer and ApplicationStore.
+The overall stack can be considered tested via _test/ServerTest.java_, in which an http server is ran and a batch of operations through the controllers are issued for testing the behavior and also some invalid inputs.
+Since it was not specified and I'm a backend developer applying for a backend role I did not bother to implement a nice and functional frontend to interact with the application's api.
+The application's api can be easily test via some http command line tools like _curl_ or _httpie_.
+
+## 5. Running it locally
+Even though it is not a good practice, under **_vascogrilo-moneytransfer.zip_** is the distributable of this application.
+Everything was developed and tested on MacOS X.
+The application can be started by running the bash script _/bin/play-java_ or _/bin/play-java.bat_ for Windows environments.
+It assumes the JRE is discoverable in its usual location.
+
