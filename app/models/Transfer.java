@@ -1,8 +1,5 @@
 package models;
 
-import static util.Util.validateAmount;
-import static util.Util.validateString;
-
 /**
  * Simple model of a money transfer operation.
  * A transfer is represented by an Id, origin Account id, destination Account id, amount to be transferred and a timestamp.
@@ -47,10 +44,8 @@ public class Transfer {
     /**
      * Sets the Id for this transfer.
      * @param id A string for the transfer's id.
-     * @throws IllegalArgumentException if string is null or empty.
      */
     public void setId(String id){
-        //validateString(id);
         this.id = id;
     }
 
@@ -65,10 +60,8 @@ public class Transfer {
     /**
      * Sets the origin account id for this transfer.
      * @param id The origin account's id.
-     * @throws IllegalArgumentException if string is null or empty.
      */
     public void setOriginAccountId(String id){
-        //validateString(id);
         this.originAccountId = id;
     }
 
@@ -83,10 +76,8 @@ public class Transfer {
     /**
      * Sets the destination account id for this transfer.
      * @param id A string for the destination account id.
-     * @throws IllegalArgumentException if string is null or empty.
      */
     public void setDestinationAccountId(String id) {
-        //validateString(id);
         this.destinationAccountId = id;
     }
 
@@ -101,10 +92,8 @@ public class Transfer {
     /**
      * Sets the amount for this transfer.
      * @param amount A Float for the transfer amount.
-     * @throws IllegalArgumentException if amount is less or equal than zero, NaN or infinite.
      */
     public void setAmount(Float amount) {
-        //validateAmount(amount);
         this.amount = amount;
     }
 

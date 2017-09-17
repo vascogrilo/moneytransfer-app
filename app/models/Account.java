@@ -1,7 +1,6 @@
 package models;
 
 import static util.Util.validateAmount;
-import static util.Util.validateString;
 
 /**
  * Simple model of a money Account.
@@ -64,10 +63,8 @@ public class Account {
   /**
    * Sets the account's name.
    * @param name A string for the account's name.
-   * @throws IllegalArgumentException if string is null or empty.
    */
   public void setName(String name) {
-    //validateString(name);
     this.name = name;
   }
 
@@ -82,10 +79,8 @@ public class Account {
   /**
    * Sets the account's owner name.
    * @param ownerName A string for the account's owner name.
-   * @throws IllegalArgumentException if string is null or empty.
    */
   public void setOwnerName(String ownerName) {
-    //validateString(ownerName);
     this.ownerName = ownerName;
   }
 

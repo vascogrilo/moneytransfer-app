@@ -249,7 +249,7 @@ public class ServerTest extends WithServer {
                     .fakeRequest(POST, "/transfers")
                     .bodyJson(Json.toJson(transfer1));
             Result result = route(app, request);
-            assertEquals(BAD_REQUEST, result.status());
+            assertEquals(FORBIDDEN, result.status());
             request.bodyJson(Json.toJson(transfer2));
             result = route(app, request);
             assertEquals(FORBIDDEN, result.status());
@@ -259,11 +259,11 @@ public class ServerTest extends WithServer {
         }
         // Section 6: Transfer create, read and delete
         {
-            Transfer transfer1 = new Transfer("0", "1", 10);
-            Transfer transfer2 = new Transfer("0", "1", 100);
-            Transfer transfer3 = new Transfer("1", "0", 90);
+            Transfer transfer1 = new Transfer("0", "1", 10f);
+            Transfer transfer2 = new Transfer("0", "1", 100f);
+            Transfer transfer3 = new Transfer("1", "0", 90f);
             Transfer transfer4 = new Transfer("1", "0", 25f);
-            Transfer transfer5 = new Transfer("1", "0", 1000000);
+            Transfer transfer5 = new Transfer("1", "0", 1000000f);
 
             Http.RequestBuilder request = Helpers
                     .fakeRequest(POST, "/transfers")
@@ -311,6 +311,14 @@ public class ServerTest extends WithServer {
             request = Helpers.fakeRequest(DELETE, "/transfers/" + transfer4.getId());
             result = route(app, request);
             assertEquals(NO_CONTENT, result.status());
+
+            // now let's check balance of accounts
+            request = Helpers.fakeRequest(GET, "/accounts/0");
+            result = route(app, request);
+            assertAccount(getJsonNodeFromResult(result), "savings", "vasco", 205f);
+            request = Helpers.fakeRequest(GET, "/accounts/1");
+            result = route(app, request);
+            assertAccount(getJsonNodeFromResult(result), "checking", "john", 45f);
         }
         // Section 7: filtering and sorting transfers
         {
@@ -320,7 +328,6 @@ public class ServerTest extends WithServer {
             JsonNode list = getJsonNodeFromResult(result);
             assertTransfer(list.get(0), "0", "1", 10f);
             assertTransfer(list.get(1), "0", "1", 100f);
-
             // filter by destination account id '0' -> should get transfer 3
             request = Helpers.fakeRequest(GET, "/transfers?destinationAccountId=0");
             result = route(app, request);
@@ -332,11 +339,10 @@ public class ServerTest extends WithServer {
             list = getJsonNodeFromResult(result);
             assertTransfer(list.get(0), "0", "1", 100f);
             // filter below amount
-            request = Helpers.fakeRequest(GET, "/transfers?belowAmount=100");
+            request = Helpers.fakeRequest(GET, "/transfers?belowAmount=90");
             result = route(app, request);
             list = getJsonNodeFromResult(result);
             assertTransfer(list.get(0), "0", "1", 10f);
-            assertTransfer(list.get(1), "1", "0", 90f);
             // filter between balances
             request = Helpers.fakeRequest(GET, "/transfers?aboveAmount=20&belowAmount=100");
             result = route(app, request);
