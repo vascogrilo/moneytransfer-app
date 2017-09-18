@@ -470,3 +470,8 @@ For Unix users, zip files do not retain Unix file permissions so when the file i
 ```bash
 chmod +x /path/to/bin/<project-name>
 ```
+
+If you do not want it to run on 0.0.0.0 and port 9000 (defaults) you can do it by running it the following way:
+```bash
+sh /path/to/bin/vgrilo-moneytransfer -Dhttp.port=DESIRED_PORT -Dhttp.address=DESIRED_ADDRESS
+```
