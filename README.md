@@ -462,8 +462,12 @@ The application's api can be easily test via some http command line tools like _
 ## 5. Running it locally
 Even though it is not a good practice, under **_vascogrilo-moneytransfer.zip_** is the distributable of this application.
 Everything was developed and tested on MacOS X.
-The application can be started by running the bash script _/bin/play-java_ or _/bin/play-java.bat_ for Windows environments.
-It assumes the JRE is discoverable in its usual location.
+The application can be started by running:
+```
+sh /path/to/bin/vgrilo-moneytransfer
+```
+or the _/bin/vgrilo-moneytransfer.bat_ for Windows environments.
+It assumes the JRE is discoverable in its usual location (JAVA_HOME).
 
 For Unix users, zip files do not retain Unix file permissions so when the file is expanded the start script will be required to be set as an executable:
 
