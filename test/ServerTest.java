@@ -240,7 +240,7 @@ public class ServerTest extends WithServer {
                     .fakeRequest(POST, "/transfers")
                     .bodyJson(Json.toJson(transfer1));
             Result result = route(app, request);
-            assertEquals(FORBIDDEN, result.status());
+            assertEquals(BAD_REQUEST, result.status());
             request.bodyJson(Json.toJson(transfer2));
             result = route(app, request);
             assertEquals(FORBIDDEN, result.status());
@@ -341,7 +341,7 @@ public class ServerTest extends WithServer {
             assertEquals("0", Json.fromJson(list.get(0), Transfer.class).getOriginAccountId());
             assertEquals("0", Json.fromJson(list.get(1), Transfer.class).getOriginAccountId());
             assertEquals("1", Json.fromJson(list.get(2), Transfer.class).getOriginAccountId());
-            
+
             // sort by origin account id desc
             list = getJsonFromRequest(GET, "/transfers?sort=-originAccountId");
             assertEquals(3, list.size());

@@ -8,8 +8,11 @@ import org.apache.commons.lang3.StringUtils;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import util.Util;
 
 import java.util.stream.Stream;
+
+import static util.Util.isAmountAtLeastZero;
 
 /**
  * Controller for interacting with the Account resource.
@@ -56,8 +59,8 @@ public class AccountController extends Controller {
             return badRequest("JSON data required");
 
         Account account = Json.fromJson(json, Account.class);
-        if (account == null || StringUtils.isEmpty(account.getName())|| StringUtils.isEmpty(account.getOwnerName()))
-            return badRequest("Invalid JSON data");
+        if (account == null || StringUtils.isEmpty(account.getName())|| StringUtils.isEmpty(account.getOwnerName()) || !isAmountAtLeastZero(account.getBalance()))
+            return badRequest("Invalid JSON data. Account's name and ownerName are required. Balance must be at least 0.");
 
         account = ApplicationStore.getInstance().createAccount(account);
         return created(Json.toJson(account)).withHeader("Location", "/accounts/" + account.getId());
@@ -89,8 +92,8 @@ public class AccountController extends Controller {
             return badRequest("JSON data required");
 
         Account account = Json.fromJson(json, Account.class);
-        if (account == null || StringUtils.isEmpty(account.getId()) || StringUtils.isEmpty(account.getName()) || StringUtils.isEmpty(account.getOwnerName()))
-            return badRequest("Invalid JSON data");
+        if (account == null || StringUtils.isEmpty(account.getId()) || StringUtils.isEmpty(account.getName()) || StringUtils.isEmpty(account.getOwnerName()) || !isAmountAtLeastZero(account.getBalance()))
+            return badRequest("Invalid JSON data. Account id, name and ownerName must be present and balance at least 0.");
         if (!id.equals(account.getId()))
             return forbidden("Resource id does not match account id");
 

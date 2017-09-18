@@ -8,8 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-
 import java.util.stream.Stream;
+import static util.Util.isAmountPositive;
 
 /**
  * Controller for interacting with the Transfer resource.
@@ -65,8 +65,8 @@ public class TransferController extends Controller {
             return badRequest("JSON data required");
 
         Transfer transfer = Json.fromJson(json, Transfer.class);
-        if (transfer == null || StringUtils.isEmpty(transfer.getOriginAccountId()) || StringUtils.isEmpty(transfer.getDestinationAccountId()))
-            return badRequest("Invalid JSON data");
+        if (transfer == null || StringUtils.isEmpty(transfer.getOriginAccountId()) || StringUtils.isEmpty(transfer.getDestinationAccountId()) || !isAmountPositive(transfer.getAmount()))
+            return badRequest("Invalid JSON data. origin and destination account id must be present and amount must be greater than 0.");
 
         if (transfer.getOriginAccountId().equals(transfer.getDestinationAccountId()))
             return forbidden("Origin and destination account ids must not be the same.");
