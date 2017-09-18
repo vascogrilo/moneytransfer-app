@@ -79,35 +79,254 @@ As the test requested there is no authentication on the http layer. Also, for th
 
 ### 3.1. /accounts
 The following operations are available to be performed on this resource:
-* **GET /accounts**
-  * Lists all accounts. It is possible to supply query params for filtering and sorting (see **Account storage** api).
-* **GET /accounts/{id}**
-  * Retrieves a specific Account, identified by _id_
-* **POST /accounts**
-  * Creates a new account
-* **PUT /accounts/{id}**
-  * Updates an existing account, identified by _id_
-* **PUT /accounts/{id}/deposit/{amount}**
-  * Deposits _amount_ into the target account, identified by _id_
-* **PUT /accounts/{id}/withdraw/{amount}**
-  * Tries to withdraw _amount_ from the target account, identified by _id_
-* **DELETE /accounts/{id}**
-  * Deletes an account, identified by _id_
-* **OPTIONS /accounts**
-  * Lists all possible operations on this resource
+#### GET /accounts
+Lists all accounts. It is possible to supply query params for filtering and sorting (see **Account storage** api).
+Example:
+```http
+http -v localhost:9000/accounts
 
+GET /accounts HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 200 OK
+Content-Length: 129
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 09:42:39 GMT
+
+[
+    {
+        "balance": 100.0,
+        "id": "0",
+        "name": "savings",
+        "ownerName": "vasco"
+    },
+    {
+        "balance": 250.0,
+        "id": "1",
+        "name": "standard",
+        "ownerName": "john"
+    }
+]
+```
+Example with filtering:
+```http
+http -v localhost:9000/accounts name==savings
+
+GET /accounts?name=savings HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 200 OK
+Content-Length: 65
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 09:46:07 GMT
+
+[
+    {
+        "balance": 100.0,
+        "id": "0",
+        "name": "savings",
+        "ownerName": "vasco"
+    }
+]
+```
+#### GET /accounts/{id}
+Retrieves a specific Account, identified by _id_.
+Example:
+```http
+http -v localhost:9000/accounts/1
+
+GET /accounts/1 HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 200 OK
+Content-Length: 63
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 09:47:18 GMT
+
+{
+    "balance": 250.0,
+    "id": "1",
+    "name": "standard",
+    "ownerName": "john"
+}
+```
+#### POST /accounts
+Creates a new account. **name** and **ownerName** are mandatory.
+Example:
+```http
+http -v POST localhost:9000 name=revolut ownerName=james
+
+POST /accounts HTTP/1.1
+Accept: application/json, */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 41
+Content-Type: application/json
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+{
+    "name": "revolut",
+    "ownerName": "james"
+}
+
+HTTP/1.1 201 Created
+Content-Length: 61
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 09:48:10 GMT
+Location: /accounts/2
+
+{
+    "balance": 0.0,
+    "id": "2",
+    "name": "revolut",
+    "ownerName": "james"
+}
+```
+#### PUT /accounts/{id}
+Updates an existing account, identified by _id_.
+Example:
+```http
+http -v PUT localhost:9000/accounts/2 name=revolut ownerName="james harden" id=2
+
+PUT /accounts/2 HTTP/1.1
+Accept: application/json, */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 59
+Content-Type: application/json
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+{
+    "id": "2",
+    "name": "revolut",
+    "ownerName": "james harden"
+}
+
+HTTP/1.1 200 OK
+Content-Length: 68
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 09:51:06 GMT
+
+{
+    "balance": 0.0,
+    "id": "2",
+    "name": "revolut",
+    "ownerName": "james harden"
+}
+```
+#### PUT /accounts/{id}/deposit/{amount}
+Deposits _amount_ into the target account, identified by _id_.
+Example:
+```http
+http -v PUT localhost:9000/accounts/2/deposit/5000
+
+PUT /accounts/2/deposit/5000 HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 0
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 200 OK
+Content-Length: 71
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 09:52:31 GMT
+
+{
+    "balance": 5000.0,
+    "id": "2",
+    "name": "revolut",
+    "ownerName": "james harden"
+}
+```
+#### PUT /accounts/{id}/withdraw/{amount}
+Tries to withdraw _amount_ from the target account, identified by _id_.
+Example:
+```http
+http -v PUT localhost:9000/accounts/2/withdraw/4500
+
+PUT /accounts/2/withdraw/4500 HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 0
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 200 OK
+Content-Length: 70
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 09:53:54 GMT
+
+{
+    "balance": 500.0,
+    "id": "2",
+    "name": "revolut",
+    "ownerName": "james harden"
+}
+```
+#### DELETE /accounts/{id}
+Deletes an account, identified by _id_.
+Example:
+```http
+http -v DELETE localhost:9000/accounts/1
+
+DELETE /accounts/1 HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 0
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 204 No Content
+Date: Mon, 18 Sep 2017 09:54:59 GMT
+```
+#### OPTIONS /accounts
+Lists all possible operations on this resource.
+Example:
+```http
+http -v OPTIONS localhost:9000/accounts
+OPTIONS /accounts HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 0
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 200 OK
+Allow: GET,POST,PUT,DELETE,OPTIONS
+Content-Length: 0
+Date: Mon, 18 Sep 2017 09:55:37 GMT
+```
 ### 3.2. /transfers
 The following operations are available to be performed on this resource:
-* **GET /transfers**
-  * Lists all transfers. It is possible to supply query params for filtering and sorting (see **Transfer storage** api)
-* **GET /transfers/{id}**
-  * Retrieves a specific Transfer, identified by _id_
-* **POST /transfers**
-  * Creates a new transfer
-* **DELETE /transfers/{id}**
-  * Deletes a transfer, identified by _id_
-* **OPTIONS /transfers**
-  * Lists all possible operations on this resource
+#### GET /transfers
+Lists all transfers. It is possible to supply query params for filtering and sorting (see **Transfer storage** api)
+#### GET /transfers/{id}
+Retrieves a specific Transfer, identified by _id_
+#### POST /transfers
+Creates a new transfer
+#### DELETE /transfers/{id}
+Deletes a transfer, identified by _id_
+#### OPTIONS /transfers
+Lists all possible operations on this resource
 
 ## 4. Considerations
 The account model is pretty basic in which it only defines a balance that cannot go below zero. I thought about adding a second balance which woulld be **allowed balance** and with that I could allow for transfers to succeed even if the origin account did not have enough **available balance** but still **allowed balance**.
