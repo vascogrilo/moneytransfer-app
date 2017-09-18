@@ -79,7 +79,7 @@ As the test requested there is no authentication on the http layer. Also, for th
 
 ### 3.1. /accounts
 The following operations are available to be performed on this resource:
-#### GET /accounts
+#### 3.1.1. GET /accounts
 Lists all accounts. It is possible to supply query params for filtering and sorting (see **Account storage** api).
 Example:
 ```http
@@ -137,7 +137,7 @@ Date: Mon, 18 Sep 2017 09:46:07 GMT
     }
 ]
 ```
-#### GET /accounts/{id}
+#### 3.1.2. GET /accounts/{id}
 Retrieves a specific Account, identified by _id_.
 Example:
 ```http
@@ -162,7 +162,7 @@ Date: Mon, 18 Sep 2017 09:47:18 GMT
     "ownerName": "john"
 }
 ```
-#### POST /accounts
+#### 3.1.3. POST /accounts
 Creates a new account. **name** and **ownerName** are mandatory.
 Example:
 ```http
@@ -195,7 +195,7 @@ Location: /accounts/2
     "ownerName": "james"
 }
 ```
-#### PUT /accounts/{id}
+#### 3.1.4. PUT /accounts/{id}
 Updates an existing account, identified by _id_.
 Example:
 ```http
@@ -228,7 +228,7 @@ Date: Mon, 18 Sep 2017 09:51:06 GMT
     "ownerName": "james harden"
 }
 ```
-#### PUT /accounts/{id}/deposit/{amount}
+#### 3.1.5. PUT /accounts/{id}/deposit/{amount}
 Deposits _amount_ into the target account, identified by _id_.
 Example:
 ```http
@@ -254,7 +254,7 @@ Date: Mon, 18 Sep 2017 09:52:31 GMT
     "ownerName": "james harden"
 }
 ```
-#### PUT /accounts/{id}/withdraw/{amount}
+#### 3.1.6. PUT /accounts/{id}/withdraw/{amount}
 Tries to withdraw _amount_ from the target account, identified by _id_.
 Example:
 ```http
@@ -280,7 +280,7 @@ Date: Mon, 18 Sep 2017 09:53:54 GMT
     "ownerName": "james harden"
 }
 ```
-#### DELETE /accounts/{id}
+#### 3.1.7. DELETE /accounts/{id}
 Deletes an account, identified by _id_.
 Example:
 ```http
@@ -297,7 +297,7 @@ User-Agent: HTTPie/0.9.9
 HTTP/1.1 204 No Content
 Date: Mon, 18 Sep 2017 09:54:59 GMT
 ```
-#### OPTIONS /accounts
+#### 3.1.8. OPTIONS /accounts
 Lists all possible operations on this resource.
 Example:
 ```http
@@ -317,17 +317,138 @@ Date: Mon, 18 Sep 2017 09:55:37 GMT
 ```
 ### 3.2. /transfers
 The following operations are available to be performed on this resource:
-#### GET /transfers
-Lists all transfers. It is possible to supply query params for filtering and sorting (see **Transfer storage** api)
-#### GET /transfers/{id}
-Retrieves a specific Transfer, identified by _id_
-#### POST /transfers
-Creates a new transfer
-#### DELETE /transfers/{id}
-Deletes a transfer, identified by _id_
-#### OPTIONS /transfers
-Lists all possible operations on this resource
+#### 3.2.1. POST /transfers
+Creates a new transfer.
+Example:
+```http
+http -v POST localhost:9000/transfers originAccountId=0 destinationAccountId=2 amount=22.4
 
+POST /transfers HTTP/1.1
+Accept: application/json, */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 71
+Content-Type: application/json
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+{
+    "amount": "22.4",
+    "destinationAccountId": "2",
+    "originAccountId": "0"
+}
+
+HTTP/1.1 201 Created
+Content-Length: 147
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 10:00:28 GMT
+Location: /transfers/f644b928-080d-4e50-bec3-1e314c067a69
+
+{
+    "amount": 22.4,
+    "destinationAccountId": "2",
+    "id": "f644b928-080d-4e50-bec3-1e314c067a69",
+    "originAccountId": "0",
+    "timestamp": "2017-09-18T10:00:28.661Z"
+}
+```
+#### 3.2.2. GET /transfers
+Lists all transfers. It is possible to supply query params for filtering and sorting (see **Transfer storage** api).
+Example:
+```http
+http -v localhost:9000/transfers
+
+GET /transfers HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 200 OK
+Content-Length: 296
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 10:02:10 GMT
+
+[
+    {
+        "amount": 22.4,
+        "destinationAccountId": "2",
+        "id": "f644b928-080d-4e50-bec3-1e314c067a69",
+        "originAccountId": "0",
+        "timestamp": "2017-09-18T10:00:28.661Z"
+    },
+    {
+        "amount": 0.4,
+        "destinationAccountId": "0",
+        "id": "d5b41d32-ee9e-4432-9627-7ff8b0f11e41",
+        "originAccountId": "2",
+        "timestamp": "2017-09-18T10:01:56.998Z"
+    }
+]
+```
+#### 3.2.3. GET /transfers/{id}
+Retrieves a specific Transfer, identified by _id_.
+```http
+http -v localhost:9000/transfers/d5b41d32-ee9e-4432-9627-7ff8b0f11e41
+
+GET /transfers/d5b41d32-ee9e-4432-9627-7ff8b0f11e41 HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 200 OK
+Content-Length: 146
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 10:03:03 GMT
+
+{
+    "amount": 0.4,
+    "destinationAccountId": "0",
+    "id": "d5b41d32-ee9e-4432-9627-7ff8b0f11e41",
+    "originAccountId": "2",
+    "timestamp": "2017-09-18T10:01:56.998Z"
+}
+```
+#### 3.2.4. DELETE /transfers/{id}
+Deletes a transfer, identified by _id_.
+Example:
+```http
+http -v DELETE localhost:9000/transfers/d5b41d32-ee9e-4432-9627-7ff8b0f11e41
+
+DELETE /transfers/d5b41d32-ee9e-4432-9627-7ff8b0f11e41 HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 0
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 204 No Content
+Date: Mon, 18 Sep 2017 10:03:59 GMT
+```
+Deleting a transfer doesn't undo it. It just deletes the record of it.
+#### 3.2.5. OPTIONS /transfers
+Lists all possible operations on this resource.
+Example:
+```http
+http -v OPTIONS localhost:9000/transfers
+
+OPTIONS /transfers HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 0
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 200 OK
+Allow: GET,POST,DELETE,OPTIONS
+Content-Length: 0
+Date: Mon, 18 Sep 2017 10:04:38 GMT
+```
 ## 4. Considerations
 The account model is pretty basic in which it only defines a balance that cannot go below zero. I thought about adding a second balance which woulld be **allowed balance** and with that I could allow for transfers to succeed even if the origin account did not have enough **available balance** but still **allowed balance**.
 I've also considered representing different types of currency. An account would have a specific currency. There would be a different resource (maybe _/exchanges_) which would define exchange rates between different types of currency. Then, a transfer between two accounts with different currencies would check these rates and convert the origin amount to the destination currency.
