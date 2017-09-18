@@ -465,3 +465,8 @@ Everything was developed and tested on MacOS X.
 The application can be started by running the bash script _/bin/play-java_ or _/bin/play-java.bat_ for Windows environments.
 It assumes the JRE is discoverable in its usual location.
 
+For Unix users, zip files do not retain Unix file permissions so when the file is expanded the start script will be required to be set as an executable:
+
+```bash
+chmod +x /path/to/bin/<project-name>
+```
