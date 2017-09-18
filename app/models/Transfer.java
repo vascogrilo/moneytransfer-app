@@ -106,8 +106,8 @@ public class Transfer {
     }
 
     /**
-     *
-     * @param timestamp
+     * Sets the transfer's timestamp.
+     * @param timestamp A string representing the timestamp (ISO 8601)
      */
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
