@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Revolut Java/Scala test</title>
+</head>
+<body>
+<h1 id="revolutjavascalatest">Revolut Java/Scala Test</h1>
+<p>This test consisted on building a RESTful API for money transfers between accounts.
+    I chose to implement this in Java and using the Play framework (because I've used it before and sped up development process).</p>
+
+<h2 id="1datamodels">1. Data Models</h2>
+
+<p>One of the main requirements for this was to keep it simple and to the point, no need for overcomplicating stuff with uneeded functionality.</p>
+
+<h3 id="11account">1.1. Account</h3>
+
+<p>An account represents something like a <em>digital wallet</em>.
+    A simple account model was designed that contains the following information:</p>
+
+<ul>
+    <li>Id: <strong>String</strong></li>
+
+    <li>Name: <strong>String</strong></li>
+
+    <li>OwnerName: <strong>String</strong></li>
+
+    <li>Balance: <strong>Float</strong></li>
+</ul>
+
+<h3 id="12transfer">1.2. Transfer</h3>
+
+<p>Transfer will be a resource that represents a transfer operation of a certain amount between two accounts.
+    A simple transfer model was designed that contains the following information:</p>
+
+<ul>
+    <li>Id: <strong>String</strong></li>
+
+    <li>OriginAccountId: <strong>String</strong></li>
+
+    <li>DestinationAccountId: <strong>String</strong></li>
+
+    <li>Amount: <strong>Float</strong></li>
+
+    <li>Timestamp: <strong>String</strong></li>
+</ul>
+
+<p>I chose the <strong>timestamp</strong> to be of type <strong>String</strong> for better reading it when Play automatically parses it to JSON.
+    It would make more sense to be a type like <strong>Date</strong> or <strong>Instant</strong> but for the sake of this test I chose otherwise.
+    (Transfers cannot be updated and the server defines the timestamp so having it as a string doesn't prove that much of an hassle)</p>
+
+<h2 id="2storage">2. Storage</h2>
+
+<p>As the test requested, everything is stored in-memory. No need for external storage.</p>
+
+<h3 id="21apis">2.1. Apis</h3>
+
+<p>I've defined two interfaces for a clear separation of what can be performed when managing the resources.</p>
+
+<h4 id="211accountstorage">2.1.1. Account storage</h4>
+
+<p>The following operations should be implemented for an account storage:</p>
+
+<ul>
+    <li>Set\<Account\> <em>listAccounts()</em></li>
+
+    <li>Stream\<Account\> <em>listAccounts(String name, String ownerName, Float balance, Float aboveBalance, Float belowBalance, String sort)</em>
+
+
+        <ul>
+            <li><strong>name</strong> is an optional value for filtering accounts with a specific name</li>
+
+            <li><strong>ownerName</strong> is an optional value for filtering accounts with a specific owner</li>
+
+            <li><strong>balance</strong> is an optional value for filtering accounts with a specific balance</li>
+
+            <li><strong>aboveBalance</strong> is an optional value for filtering accounts with a balance greater than</li>
+
+            <li><strong>belowBalance</strong> is an optional value for filtering accounts with a balance less than</li>
+
+            <li><strong>sort</strong> is an optional value for sorting the results. the value should be a field name of Account and preprend it with a '-' for descending order. Example: <em>-balance</em></li></ul>
+    </li>
+
+    <li>Account <em>getAccount(String id)</em></li>
+
+    <li>Account <em>createAccount(Account account)</em></li>
+
+    <li>Account <em>updateAccount(Account account)</em></li>
+
+    <li>boolean <em>deleteAccount(String id)</em></li>
+
+    <li>void <em>clearAccounts()</em></li>
+
+    <li>Account <em>deposit(String id, Float amount)</em></li>
+
+    <li>Account <em>withdraw(String id, Float amount) throws Account.InsufficientFundsException</em></li>
+</ul>
+
+<h4 id="212transferstorage">2.1.2. Transfer storage</h4>
+
+<p>The following operations should be implemented for a transfer storage:</p>
+
+<ul>
+    <li>Set\<Transfer\> <em>listTransfers()</em></li>
+
+    <li>Stream\<Transfer\> <em>listTransfers(String originAccountId, String destinationAccountId, Float amount, Float aboveAmount, Float belowAmount, String sort)</em>
+
+
+        <ul>
+            <li><strong>originAccountId</strong> is an optional value for filtering transfers with a specific origin account id</li>
+
+            <li><strong>destinationAccountId</strong> is an optional value for filtering transfers with a specific destination account id</li>
+
+            <li><strong>amount</strong> is an optional value for filtering transfers with a specific amount</li>
+
+            <li><strong>aboveAmount</strong> is an optional value for filtering transfers above that amount</li>
+
+            <li><strong>belowAmount</strong> is an optional value for filtering transfers below that amount</li>
+
+            <li><strong>sort</strong> is an optional value for sorting the results. the value should be a field name of Transfer and preprend it with a '-' for descending order. Example: <em>-timestamp</em></li></ul>
+    </li>
+
+    <li>Transfer <em>getTransfer(String id)</em></li>
+
+    <li>Transfer <em>createTransfer(Transfer transfer)</em></li>
+
+    <li>boolean <em>deleteTransfer(String id)</em></li>
+
+    <li>void <em>clearTransfers()</em></li>
+</ul>
+
+<h3 id="22applicationstore">2.2. ApplicationStore</h3>
+
+<p>This class implements both <em>AccountStorage</em> and <em>TransferStorage</em> and is responsible for maintaining the list of both accounts and transfers.</p>
+
+<p>Creating an account needs to perform some validation like the account's name and owner name can't be either null or an empty string. The initial balance must not be below zero, NaN or Infinity. An internal id must be generated and assigned to the account.
+    Updating an account needs to perform some validation like the <em>modified</em> account's name and owner name can't be either null or empty string. The new balance must not be below zero, NaN or Infinity.</p>
+
+<p>Creating a transfer involves several checks. First of all the origin account id and destination account id must identify <em>existing</em> accounts and they should not be the same. The amount should be above 0 and not NaN or Infinity. If these requirements are validated the transfer is considered OK and an internal id should be generated and assigned to the transfer, along with a timestamp of the operation. Now the <em>amount</em> must be withdrawn from the origin account and deposited into the destination account, if the origin account has sufficient funds.</p>
+
+<h2 id="3httprestapi">3. HTTP REST API</h2>
+
+<p>As the test requested there is no authentication on the http layer. Also, for the sake of this test, I chose to leave out any SSL.</p>
+
+<h3 id="31accounts">3.1. /accounts</h3>
+
+<p>The following operations are available to be performed on this resource:</p>
+
+<h4 id="311getaccounts">3.1.1. GET /accounts</h4>
+
+<p>Lists all accounts. It is possible to supply query params for filtering and sorting (see <strong>Account storage</strong> api).
+    Example:</p>
+
+<pre><code class="http language-http">http -v localhost:9000/accounts
+
+GET /accounts HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 200 OK
+Content-Length: 129
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 09:42:39 GMT
+
+[
+    {
+        "balance": 100.0,
+        "id": "0",
+        "name": "savings",
+        "ownerName": "vasco"
+    },
+    {
+        "balance": 250.0,
+        "id": "1",
+        "name": "standard",
+        "ownerName": "john"
+    }
+]
+</code></pre>
+
+<p>Example with filtering:</p>
+
+<pre><code class="http language-http">http -v localhost:9000/accounts name==savings
+
+GET /accounts?name=savings HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 200 OK
+Content-Length: 65
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 09:46:07 GMT
+
+[
+    {
+        "balance": 100.0,
+        "id": "0",
+        "name": "savings",
+        "ownerName": "vasco"
+    }
+]
+</code></pre>
+
+<h4 id="312getaccountsid">3.1.2. GET /accounts/{id}</h4>
+
+<p>Retrieves a specific Account, identified by <em>id</em>.
+    Example:</p>
+
+<pre><code class="http language-http">http -v localhost:9000/accounts/1
+
+GET /accounts/1 HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 200 OK
+Content-Length: 63
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 09:47:18 GMT
+
+{
+    "balance": 250.0,
+    "id": "1",
+    "name": "standard",
+    "ownerName": "john"
+}
+</code></pre>
+
+<h4 id="313postaccounts">3.1.3. POST /accounts</h4>
+
+<p>Creates a new account. <strong>name</strong> and <strong>ownerName</strong> are mandatory.
+    Example:</p>
+
+<pre><code class="http language-http">http -v POST localhost:9000 name=revolut ownerName=james
+
+POST /accounts HTTP/1.1
+Accept: application/json, */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 41
+Content-Type: application/json
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+{
+    "name": "revolut",
+    "ownerName": "james"
+}
+
+HTTP/1.1 201 Created
+Content-Length: 61
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 09:48:10 GMT
+Location: /accounts/2
+
+{
+    "balance": 0.0,
+    "id": "2",
+    "name": "revolut",
+    "ownerName": "james"
+}
+</code></pre>
+
+<h4 id="314putaccountsid">3.1.4. PUT /accounts/{id}</h4>
+
+<p>Updates an existing account, identified by <em>id</em>.
+    Example:</p>
+
+<pre><code class="http language-http">http -v PUT localhost:9000/accounts/2 name=revolut ownerName="james harden" id=2
+
+PUT /accounts/2 HTTP/1.1
+Accept: application/json, */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 59
+Content-Type: application/json
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+{
+    "id": "2",
+    "name": "revolut",
+    "ownerName": "james harden"
+}
+
+HTTP/1.1 200 OK
+Content-Length: 68
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 09:51:06 GMT
+
+{
+    "balance": 0.0,
+    "id": "2",
+    "name": "revolut",
+    "ownerName": "james harden"
+}
+</code></pre>
+
+<h4 id="315putaccountsiddepositamount">3.1.5. PUT /accounts/{id}/deposit/{amount}</h4>
+
+<p>Deposits <em>amount</em> into the target account, identified by <em>id</em>.
+    Example:</p>
+
+<pre><code class="http language-http">http -v PUT localhost:9000/accounts/2/deposit/5000
+
+PUT /accounts/2/deposit/5000 HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 0
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 200 OK
+Content-Length: 71
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 09:52:31 GMT
+
+{
+    "balance": 5000.0,
+    "id": "2",
+    "name": "revolut",
+    "ownerName": "james harden"
+}
+</code></pre>
+
+<h4 id="316putaccountsidwithdrawamount">3.1.6. PUT /accounts/{id}/withdraw/{amount}</h4>
+
+<p>Tries to withdraw <em>amount</em> from the target account, identified by <em>id</em>.
+    Example:</p>
+
+<pre><code class="http language-http">http -v PUT localhost:9000/accounts/2/withdraw/4500
+
+PUT /accounts/2/withdraw/4500 HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 0
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 200 OK
+Content-Length: 70
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 09:53:54 GMT
+
+{
+    "balance": 500.0,
+    "id": "2",
+    "name": "revolut",
+    "ownerName": "james harden"
+}
+</code></pre>
+
+<h4 id="317deleteaccountsid">3.1.7. DELETE /accounts/{id}</h4>
+
+<p>Deletes an account, identified by <em>id</em>.
+    Example:</p>
+
+<pre><code class="http language-http">http -v DELETE localhost:9000/accounts/1
+
+DELETE /accounts/1 HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 0
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 204 No Content
+Date: Mon, 18 Sep 2017 09:54:59 GMT
+</code></pre>
+
+<h4 id="318optionsaccounts">3.1.8. OPTIONS /accounts</h4>
+
+<p>Lists all possible operations on this resource.
+    Example:</p>
+
+<pre><code class="http language-http">http -v OPTIONS localhost:9000/accounts
+OPTIONS /accounts HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 0
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 200 OK
+Allow: GET,POST,PUT,DELETE,OPTIONS
+Content-Length: 0
+Date: Mon, 18 Sep 2017 09:55:37 GMT
+</code></pre>
+
+<h3 id="32transfers">3.2. /transfers</h3>
+
+<p>The following operations are available to be performed on this resource:</p>
+
+<h4 id="321posttransfers">3.2.1. POST /transfers</h4>
+
+<p>Creates a new transfer.
+    Example:</p>
+
+<pre><code class="http language-http">http -v POST localhost:9000/transfers originAccountId=0 destinationAccountId=2 amount=22.4
+
+POST /transfers HTTP/1.1
+Accept: application/json, */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 71
+Content-Type: application/json
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+{
+    "amount": "22.4",
+    "destinationAccountId": "2",
+    "originAccountId": "0"
+}
+
+HTTP/1.1 201 Created
+Content-Length: 147
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 10:00:28 GMT
+Location: /transfers/f644b928-080d-4e50-bec3-1e314c067a69
+
+{
+    "amount": 22.4,
+    "destinationAccountId": "2",
+    "id": "f644b928-080d-4e50-bec3-1e314c067a69",
+    "originAccountId": "0",
+    "timestamp": "2017-09-18T10:00:28.661Z"
+}
+</code></pre>
+
+<h4 id="322gettransfers">3.2.2. GET /transfers</h4>
+
+<p>Lists all transfers. It is possible to supply query params for filtering and sorting (see <strong>Transfer storage</strong> api).
+    Example:</p>
+
+<pre><code class="http language-http">http -v localhost:9000/transfers
+
+GET /transfers HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 200 OK
+Content-Length: 296
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 10:02:10 GMT
+
+[
+    {
+        "amount": 22.4,
+        "destinationAccountId": "2",
+        "id": "f644b928-080d-4e50-bec3-1e314c067a69",
+        "originAccountId": "0",
+        "timestamp": "2017-09-18T10:00:28.661Z"
+    },
+    {
+        "amount": 0.4,
+        "destinationAccountId": "0",
+        "id": "d5b41d32-ee9e-4432-9627-7ff8b0f11e41",
+        "originAccountId": "2",
+        "timestamp": "2017-09-18T10:01:56.998Z"
+    }
+]
+</code></pre>
+
+<h4 id="323gettransfersid">3.2.3. GET /transfers/{id}</h4>
+
+<p>Retrieves a specific Transfer, identified by <em>id</em>.</p>
+
+<pre><code class="http language-http">http -v localhost:9000/transfers/d5b41d32-ee9e-4432-9627-7ff8b0f11e41
+
+GET /transfers/d5b41d32-ee9e-4432-9627-7ff8b0f11e41 HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 200 OK
+Content-Length: 146
+Content-Type: application/json; charset=UTF-8
+Date: Mon, 18 Sep 2017 10:03:03 GMT
+
+{
+    "amount": 0.4,
+    "destinationAccountId": "0",
+    "id": "d5b41d32-ee9e-4432-9627-7ff8b0f11e41",
+    "originAccountId": "2",
+    "timestamp": "2017-09-18T10:01:56.998Z"
+}
+</code></pre>
+
+<h4 id="324deletetransfersid">3.2.4. DELETE /transfers/{id}</h4>
+
+<p>Deletes a transfer, identified by <em>id</em>.
+    Example:</p>
+
+<pre><code class="http language-http">http -v DELETE localhost:9000/transfers/d5b41d32-ee9e-4432-9627-7ff8b0f11e41
+
+DELETE /transfers/d5b41d32-ee9e-4432-9627-7ff8b0f11e41 HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 0
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 204 No Content
+Date: Mon, 18 Sep 2017 10:03:59 GMT
+</code></pre>
+
+<p>Deleting a transfer doesn't undo it. It just deletes the record of it.</p>
+
+<h4 id="325optionstransfers">3.2.5. OPTIONS /transfers</h4>
+
+<p>Lists all possible operations on this resource.
+    Example:</p>
+
+<pre><code class="http language-http">http -v OPTIONS localhost:9000/transfers
+
+OPTIONS /transfers HTTP/1.1
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Content-Length: 0
+Host: localhost:9000
+User-Agent: HTTPie/0.9.9
+
+HTTP/1.1 200 OK
+Allow: GET,POST,DELETE,OPTIONS
+Content-Length: 0
+Date: Mon, 18 Sep 2017 10:04:38 GMT
+</code></pre>
+
+<h2 id="4considerations">4. Considerations</h2>
+
+<p>The account model is pretty basic in which it only defines a balance that cannot go below zero. I thought about adding a second balance which woulld be <strong>allowed balance</strong> and with that I could allow for transfers to succeed even if the origin account did not have enough <strong>available balance</strong> but still <strong>allowed balance</strong>.
+    I've also considered representing different types of currency. An account would have a specific currency. There would be a different resource (maybe <em>/exchanges</em>) which would define exchange rates between different types of currency. Then, a transfer between two accounts with different currencies would check these rates and convert the origin amount to the destination currency.
+    After some consideration and remembering to keep it simple and to the point I've decided to not implement these two functionalities.</p>
+
+<p>It was requested to prove that the application works through tests. I have added unit testing for Account, Transfer and ApplicationStore.
+    The overall stack can be considered tested via <em>test/ServerTest.java</em>, in which an http server is ran and a batch of operations through the controllers are issued for testing the behavior and also some invalid inputs.
+    Since it was not specified and I'm a backend developer applying for a backend role I did not bother to implement a nice and functional frontend to interact with the application's api.
+    The application's api can be easily test via some http command line tools like <em>curl</em> or <em>httpie</em>.</p>
+
+<h2 id="5runningitlocally">5. Running it locally</h2>
+
+<p>Even though it is not a good practice, under <strong><em>vascogrilo-moneytransfer.zip</em></strong> is the distributable of this application.
+    Everything was developed and tested on MacOS X.
+    The application can be started by running the bash script <em>/bin/play-java</em> or <em>/bin/play-java.bat</em> for Windows environments.
+    It assumes the JRE is discoverable in its usual location.</p>
+</body>
+</html>
