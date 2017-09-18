@@ -460,7 +460,7 @@ Since it was not specified and I'm a backend developer applying for a backend ro
 The application's api can be easily test via some http command line tools like _curl_ or _httpie_.
 
 ## 5. Running it locally
-Even though it is not a good practice, under **_vascogrilo-moneytransfer.zip_** is the distributable of this application.
+Even though it is not a good practice, under **_vgrilo-moneytransfer-0.1.zip_** is the distributable of this application.
 Everything was developed and tested on MacOS X.
 The application can be started by running:
 ```
