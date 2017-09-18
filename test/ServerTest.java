@@ -26,7 +26,7 @@ public class ServerTest extends WithServer {
         try (WSClient ws = WS.newClient(this.testServer.port())) {
             CompletionStage<WSResponse> stage = ws.url(url).get();
             WSResponse response = stage.toCompletableFuture().get();
-            assertEquals(NOT_FOUND, response.getStatus());
+            assertEquals(OK, response.getStatus());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -124,6 +124,7 @@ public class ServerTest extends WithServer {
             Account placeholder = Json.fromJson(getJsonNodeFromResult(result), Account.class);
             assertEquals(account4.getId(), placeholder.getId());
             assertEquals("vasco", placeholder.getOwnerName());
+
             // try to delete fake id
             request = Helpers.fakeRequest(DELETE, "/accounts/5555");
             result = route(app, request);
@@ -137,78 +138,65 @@ public class ServerTest extends WithServer {
         // Section 3: filtering and sorting accounts
         {
             // filter by name 'savings' -> should get account 1 and 3
-            Http.RequestBuilder request = Helpers.fakeRequest(GET, "/accounts?name=savings");
-            Result result = route(app, request);
-            JsonNode list = getJsonNodeFromResult(result);
+            JsonNode list = getJsonFromRequest(GET, "/accounts?name=savings");
             assertAccount(list.get(0), "savings", "vasco", 200f);
             assertAccount(list.get(1), "savings", "john", 5000f);
+
             // filter by owner name 'john' -> should get account 2 and 3
-            request = Helpers.fakeRequest(GET, "/accounts?ownerName=john");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
+            list = getJsonFromRequest(GET, "/accounts?ownerName=john");
             assertAccount(list.get(0), "checking", "john", 50f);
             assertAccount(list.get(1), "savings", "john", 5000f);
+
             // filter by exact balance
-            request = Helpers.fakeRequest(GET, "/accounts?balance=50");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
+            list = getJsonFromRequest(GET, "/accounts?balance=50");
             assertAccount(list.get(0), "checking", "john", 50f);
+
             // filter above balance
-            request = Helpers.fakeRequest(GET, "/accounts?aboveBalance=100");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
+            list = getJsonFromRequest(GET, "/accounts?aboveBalance=100");
             assertAccount(list.get(0), "savings", "vasco", 200f);
             assertAccount(list.get(1), "savings", "john", 5000f);
+
             // filter below balance
-            request = Helpers.fakeRequest(GET, "/accounts?belowBalance=1000");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
+            list = getJsonFromRequest(GET, "/accounts?belowBalance=1000");
             assertAccount(list.get(0), "savings", "vasco", 200f);
             assertAccount(list.get(1), "checking", "john", 50f);
+
             // filter between balances
-            request = Helpers.fakeRequest(GET, "/accounts?aboveBalance=200&belowBalance=10000");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
+            list = getJsonFromRequest(GET, "/accounts?aboveBalance=200&belowBalance=10000");
             assertAccount(list.get(0), "savings", "john", 5000f);
+
             // sort by name
-            request = Helpers.fakeRequest(GET, "/accounts?sort=name");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
+            list = getJsonFromRequest(GET, "/accounts?sort=name");
             assertAccount(list.get(0), "checking", "john", 50f);
             assertAccount(list.get(1), "savings", "vasco", 200f);
             assertAccount(list.get(2), "savings", "john", 5000f);
+
             // sort by name desc
-            request = Helpers.fakeRequest(GET, "/accounts?sort=-name");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
+            list = getJsonFromRequest(GET, "/accounts?sort=-name");
             assertAccount(list.get(0), "savings", "vasco", 200f);
             assertAccount(list.get(1), "savings", "john", 5000f);
             assertAccount(list.get(2), "checking", "john", 50f);
+
             // sort by ownerName
-            request = Helpers.fakeRequest(GET, "/accounts?sort=ownerName");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
+            list = getJsonFromRequest(GET, "/accounts?sort=ownerName");
             assertAccount(list.get(0), "checking", "john", 50f);
             assertAccount(list.get(1), "savings", "john", 5000f);
             assertAccount(list.get(2), "savings", "vasco", 200f);
+
             // sort by ownerName desc
-            request = Helpers.fakeRequest(GET, "/accounts?sort=-ownerName");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
+            list = getJsonFromRequest(GET, "/accounts?sort=-ownerName");
             assertAccount(list.get(0), "savings", "vasco", 200f);
             assertAccount(list.get(1), "checking", "john", 50f);
             assertAccount(list.get(2), "savings", "john", 5000f);
+
             // sort by balance
-            request = Helpers.fakeRequest(GET, "/accounts?sort=balance");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
+            list = getJsonFromRequest(GET, "/accounts?sort=balance");
             assertAccount(list.get(0), "checking", "john", 50f);
             assertAccount(list.get(1), "savings", "vasco", 200f);
             assertAccount(list.get(2), "savings", "john", 5000f);
+
             // sort by balance desc
-            request = Helpers.fakeRequest(GET, "/accounts?sort=-balance");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
+            list = getJsonFromRequest(GET, "/accounts?sort=-balance");
             assertAccount(list.get(0), "savings", "john", 5000f);
             assertAccount(list.get(1), "savings", "vasco", 200f);
             assertAccount(list.get(2), "checking", "john", 50f);
@@ -224,15 +212,18 @@ public class ServerTest extends WithServer {
             request = Helpers.fakeRequest(PUT, "/accounts/092304903/deposit/30");
             result = route(app, request);
             assertEquals(NOT_FOUND, result.status());
+
             // deposit to valid id
             request = Helpers.fakeRequest(PUT, "/accounts/" + account1.getId() + "/deposit/30");
             result = route(app, request);
             assertEquals(OK, result.status());
             assertAccount(getJsonNodeFromResult(result), "savings", "vasco", 230f);
+
             // withdraw from invalid id
             request = Helpers.fakeRequest(PUT, "/accounts/alll/withdraw/30");
             result = route(app, request);
             assertEquals(NOT_FOUND, result.status());
+
             // withdraw from valid id
             request = Helpers.fakeRequest(PUT, "/accounts/" + account1.getId() + "/withdraw/30");
             result = route(app, request);
@@ -323,74 +314,73 @@ public class ServerTest extends WithServer {
         // Section 7: filtering and sorting transfers
         {
             // filter by origin account id '0' -> should get transfer 1 and 2
-            Http.RequestBuilder request = Helpers.fakeRequest(GET, "/transfers?originAccountId=0");
-            Result result = route(app, request);
-            JsonNode list = getJsonNodeFromResult(result);
-            assertTransfer(list.get(0), "0", "1", 10f);
-            assertTransfer(list.get(1), "0", "1", 100f);
+            JsonNode list = getJsonFromRequest(GET, "/transfers?originAccountId=0");
+            assertEquals(2, list.size());
+            assertEquals("0", Json.fromJson(list.get(0), Transfer.class).getOriginAccountId());
+            assertEquals("0", Json.fromJson(list.get(1), Transfer.class).getOriginAccountId());
+
             // filter by destination account id '0' -> should get transfer 3
-            request = Helpers.fakeRequest(GET, "/transfers?destinationAccountId=0");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
+            list = getJsonFromRequest(GET, "/transfers?destinationAccountId=0");
             assertTransfer(list.get(0), "1", "0", 90f);
+
             // filter above amount
-            request = Helpers.fakeRequest(GET, "/transfers?aboveAmount=91");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
+            list = getJsonFromRequest(GET, "/transfers?aboveAmount=91");
             assertTransfer(list.get(0), "0", "1", 100f);
+
             // filter below amount
-            request = Helpers.fakeRequest(GET, "/transfers?belowAmount=90");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
+            list = getJsonFromRequest(GET, "/transfers?belowAmount=90");
             assertTransfer(list.get(0), "0", "1", 10f);
+
             // filter between balances
-            request = Helpers.fakeRequest(GET, "/transfers?aboveAmount=20&belowAmount=100");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
+            list = getJsonFromRequest(GET, "/transfers?aboveAmount=20&belowAmount=100");
             assertTransfer(list.get(0), "1", "0", 90f);
+
             // sort by origin account id
-            request = Helpers.fakeRequest(GET, "/transfers?sort=originAccountId");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
-            assertTransfer(list.get(0), "0", "1", 10f);
-            assertTransfer(list.get(1), "0", "1", 100f);
-            assertTransfer(list.get(2), "1", "0", 90f);
+            list = getJsonFromRequest(GET, "/transfers?sort=originAccountId");
+            assertEquals(3, list.size());
+            assertEquals("0", Json.fromJson(list.get(0), Transfer.class).getOriginAccountId());
+            assertEquals("0", Json.fromJson(list.get(1), Transfer.class).getOriginAccountId());
+            assertEquals("1", Json.fromJson(list.get(2), Transfer.class).getOriginAccountId());
+            
             // sort by origin account id desc
-            request = Helpers.fakeRequest(GET, "/transfers?sort=-originAccountId");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
-            assertTransfer(list.get(0), "1", "0", 90f);
-            assertTransfer(list.get(1), "0", "1", 10f);
-            assertTransfer(list.get(2), "0", "1", 100f);
+            list = getJsonFromRequest(GET, "/transfers?sort=-originAccountId");
+            assertEquals(3, list.size());
+            assertEquals("1", Json.fromJson(list.get(0), Transfer.class).getOriginAccountId());
+            assertEquals("0", Json.fromJson(list.get(1), Transfer.class).getOriginAccountId());
+            assertEquals("0", Json.fromJson(list.get(2), Transfer.class).getOriginAccountId());
+
             // sort by destination account id
-            request = Helpers.fakeRequest(GET, "/transfers?sort=destinationAccountId");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
-            assertTransfer(list.get(0), "1", "0", 90f);
-            assertTransfer(list.get(1), "0", "1", 10f);
-            assertTransfer(list.get(2), "0", "1", 100f);
+            list = getJsonFromRequest(GET, "/transfers?sort=destinationAccountId");
+            assertEquals(3, list.size());
+            assertEquals("1", Json.fromJson(list.get(0), Transfer.class).getOriginAccountId());
+            assertEquals("0", Json.fromJson(list.get(1), Transfer.class).getOriginAccountId());
+            assertEquals("0", Json.fromJson(list.get(2), Transfer.class).getOriginAccountId());
+
             // sort by destination account id desc
-            request = Helpers.fakeRequest(GET, "/transfers?sort=-destinationAccountId");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
-            assertTransfer(list.get(0), "0", "1", 10f);
-            assertTransfer(list.get(1), "0", "1", 100f);
-            assertTransfer(list.get(2), "1", "0", 90f);
+            list = getJsonFromRequest(GET, "/transfers?sort=-destinationAccountId");
+            assertEquals(3, list.size());
+            assertEquals("0", Json.fromJson(list.get(0), Transfer.class).getOriginAccountId());
+            assertEquals("0", Json.fromJson(list.get(1), Transfer.class).getOriginAccountId());
+            assertEquals("1", Json.fromJson(list.get(2), Transfer.class).getOriginAccountId());
+
             // sort by amount
-            request = Helpers.fakeRequest(GET, "/transfers?sort=amount");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
+            list = getJsonFromRequest(GET, "/transfers?sort=amount");
             assertTransfer(list.get(0), "0", "1", 10f);
             assertTransfer(list.get(1), "1", "0", 90f);
             assertTransfer(list.get(2), "0", "1", 100f);
+
             // sort by balance desc
-            request = Helpers.fakeRequest(GET, "/transfers?sort=-amount");
-            result = route(app, request);
-            list = getJsonNodeFromResult(result);
+            list = getJsonFromRequest(GET, "/transfers?sort=-amount");
             assertTransfer(list.get(0), "0", "1", 100f);
             assertTransfer(list.get(1), "1", "0", 90f);
             assertTransfer(list.get(2), "0", "1", 10f);
         }
+    }
+
+    private JsonNode getJsonFromRequest(String method, String uri){
+        Http.RequestBuilder request = Helpers.fakeRequest(method, uri);
+        Result result = route(app, request);
+        return getJsonNodeFromResult(result);
     }
 
     private void assertAccount(JsonNode json, String expectedName, String expectedOwnerName, Float expectedBalance){
