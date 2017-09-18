@@ -101,7 +101,7 @@ public class AccountController extends Controller {
         if (updated == null)
             return notFound("Account with id " +  account.getId() + " not found");
 
-        return ok(Json.toJson(updated));
+        return noContent();
     }
 
     /**

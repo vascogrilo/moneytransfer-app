@@ -120,10 +120,7 @@ public class ServerTest extends WithServer {
             // now with valid resource id
             request = Helpers.fakeRequest(PUT, "/accounts/" + account4.getId()).bodyJson(Json.toJson(account4));
             result = route(app, request);
-            assertEquals(OK, result.status());
-            Account placeholder = Json.fromJson(getJsonNodeFromResult(result), Account.class);
-            assertEquals(account4.getId(), placeholder.getId());
-            assertEquals("vasco", placeholder.getOwnerName());
+            assertEquals(NO_CONTENT, result.status());
 
             // try to delete fake id
             request = Helpers.fakeRequest(DELETE, "/accounts/5555");
