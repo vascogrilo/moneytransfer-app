@@ -1,10 +1,10 @@
 # Revolut Java/Scala Test
 
 This test consisted on building a RESTful API for money transfers between accounts.
-I chose to implement this in Java and using the Play framework (because I've used it before and sped up development process).
+I chose to implement this in Java and using the Play Framework 2.5 (because I've used it before and sped up development process).
 
 ## 1. Data Models
-One of the main requirements for this was to keep it simple and to the point, no need for overcomplicating stuff with uneeded functionality.
+One of the main requirements for this was to keep it simple and to the point, no need for over-complicating stuff with unnecessary functionality.
 
 ### 1.1. Account
 An account represents something like a _digital wallet_.
