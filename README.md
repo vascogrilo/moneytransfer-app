@@ -216,17 +216,8 @@ User-Agent: HTTPie/0.9.9
     "ownerName": "james harden"
 }
 
-HTTP/1.1 200 OK
-Content-Length: 68
-Content-Type: application/json; charset=UTF-8
+HTTP/1.1 204 No Content
 Date: Mon, 18 Sep 2017 09:51:06 GMT
-
-{
-    "balance": 0.0,
-    "id": "2",
-    "name": "revolut",
-    "ownerName": "james harden"
-}
 ```
 #### 3.1.5. PUT /accounts/{id}/deposit/{amount}
 Deposits _amount_ into the target account, identified by _id_.
