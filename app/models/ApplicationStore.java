@@ -17,6 +17,7 @@ public class ApplicationStore implements AccountStorage, TransferStorage {
     private static ApplicationStore instance;
     private final Map<String, Account> accounts;
     private final Map<String, Transfer> transfers;
+    private long nextAccountId = 1;
 
     /**
      * Gets the current singleton instance of this class.
@@ -51,7 +52,7 @@ public class ApplicationStore implements AccountStorage, TransferStorage {
      */
     @Override
     public synchronized Account createAccount(Account account) {
-        String id = Integer.toString(accounts.size());
+        String id = Long.toString(nextAccountId++);
         account.setId(id);
         accounts.put(id, account);
         return account;
